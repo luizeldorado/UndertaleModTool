@@ -943,10 +943,15 @@ namespace UndertaleModTool
             GoForward();
         }
 
+        private SearchInCodeWindow searchInCodeWindow;
         private void Command_SearchInCode(object sender, ExecutedRoutedEventArgs e)
         {
-            SearchInCodeWindow w = new();
-            w.Show();
+            if (searchInCodeWindow is null)
+            {
+                searchInCodeWindow = new();
+                searchInCodeWindow.Show();
+            }
+            searchInCodeWindow.ActivateAndFocusOnTextBox();
         }
 
         private void DisposeGameData()
