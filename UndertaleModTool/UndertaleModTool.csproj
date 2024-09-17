@@ -3,8 +3,9 @@
         <TargetFramework>net8.0-windows</TargetFramework>
         <RollForward>LatestMajor</RollForward>
         <OutputType>WinExe</OutputType>
-        <!-- TODO: this should properly get migrated and get rid of -->
-        <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+	<Version>0.6.1.0</Version>
+	<Copyright>Copyright ©  2018-2024</Copyright>
+	<IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
         <UseWpf>true</UseWpf>
         <DebugType>embedded</DebugType>
         <Platforms>AnyCPU;x64</Platforms>
