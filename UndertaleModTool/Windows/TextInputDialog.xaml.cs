@@ -1,19 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
+﻿using System.ComponentModel;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
 
 namespace UndertaleModTool
 {
@@ -32,9 +18,12 @@ namespace UndertaleModTool
         public string InputText { get; set; } // text in the textbox.
         public bool PreventClose { get; set; } // should the dialog prevent itself from closing?
         public bool IsMultiline { get; set; }
+        public bool IsReadOnly { get; set; } = false;
 
-        public TextInputDialog(string titleText, string labelText, string defaultInputBoxText, string cancelButtonText, string submitButtonText, bool isMultiline, bool preventClose)
+        public TextInputDialog(string titleText, string labelText, string defaultInputBoxText="", string cancelButtonText="Cancel", string submitButtonText="Submit", bool isMultiline=false, bool preventClose=false)
         {
+            InitializeComponent();
+
             IsMultiline = isMultiline;
             PreventClose = preventClose;
             MessageTitle = titleText;
@@ -42,8 +31,7 @@ namespace UndertaleModTool
             ButtonTitle = submitButtonText;
             CancelButtonTitle = cancelButtonText;
             InputText = defaultInputBoxText;
-
-            InitializeComponent();
+            
             this.DataContext = this;
         }
         private void Window_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)

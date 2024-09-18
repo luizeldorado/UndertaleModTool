@@ -578,16 +578,6 @@ namespace UndertaleModTool
             {
                 foreach (var pair in appDarkStyle)
                     resources[pair.Key] = pair.Value;
-
-                Windows.TextInput.BGColor = System.Drawing.Color.FromArgb(darkColor.R,
-                                                                          darkColor.G,
-                                                                          darkColor.B);
-                Windows.TextInput.TextBoxBGColor = System.Drawing.Color.FromArgb(darkLightColor.R,
-                                                                                 darkLightColor.G,
-                                                                                 darkLightColor.B);
-                Windows.TextInput.TextColor = System.Drawing.Color.FromArgb(whiteColor.R,
-                                                                            whiteColor.G,
-                                                                            whiteColor.B);
             }
             else
             {
@@ -596,10 +586,6 @@ namespace UndertaleModTool
 
                 resources[SystemColors.GrayTextBrushKey] = grayTextBrush;
                 resources[SystemColors.InactiveSelectionHighlightBrushKey] = inactiveSelectionBrush;
-
-                Windows.TextInput.BGColor = System.Drawing.SystemColors.Window;
-                Windows.TextInput.TextBoxBGColor = System.Drawing.SystemColors.ControlLight;
-                Windows.TextInput.TextColor = System.Drawing.SystemColors.ControlText;
             }
 
             if (!isStartup)
@@ -2828,16 +2814,14 @@ namespace UndertaleModTool
 
         public string SimpleTextInput(string titleText, string labelText, string defaultInputBoxText, bool isMultiline, bool showDialog = true)
         {
-            TextInput input = new TextInput(labelText, titleText, defaultInputBoxText, isMultiline);
+            TextInputDialog input = new TextInputDialog(titleText, labelText, defaultInputBoxText, isMultiline: isMultiline);
 
-            System.Windows.Forms.DialogResult result = System.Windows.Forms.DialogResult.None;
             if (showDialog)
             {
-                result = input.ShowDialog();
-                input.Dispose();
+                var result = input.ShowDialog();
 
-                if (result == System.Windows.Forms.DialogResult.OK)
-                    return input.ReturnString.Replace('\v', '\n'); //values preserved after close; Shift+Enter -> '\v'
+                if (result == true)
+                    return input.InputText.Replace('\v', '\n'); //values preserved after close; Shift+Enter -> '\v'
                 else
                     return null;
             }
@@ -2851,7 +2835,8 @@ namespace UndertaleModTool
 
         public void SimpleTextOutput(string titleText, string labelText, string message, bool isMultiline)
         {
-            TextInput textOutput = new TextInput(labelText, titleText, message, isMultiline, true); //read-only mode
+            TextInputDialog textOutput = new TextInputDialog(titleText, labelText, message, isMultiline: isMultiline);
+            textOutput.IsReadOnly = true; //read-only mode
             textOutput.Show();
         }
         public async Task ClickableSearchOutput(string title, string query, int resultsCount, IOrderedEnumerable<KeyValuePair<string, List<(int lineNum, string codeLine)>>> resultsDict, bool showInDecompiledView, IOrderedEnumerable<string> failedList = null)
