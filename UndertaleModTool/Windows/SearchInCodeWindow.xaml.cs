@@ -45,7 +45,8 @@ namespace UndertaleModTool.Windows
         
         Regex keywordRegex;
 
-        ThreadLocal<GlobalDecompileContext> decompileContext;
+        GlobalDecompileContext globalDecompileContext;
+        Underanalyzer.Decompiler.IDecompileSettings decompileSettings;
 
         LoaderDialog loaderDialog;
 
@@ -116,18 +117,19 @@ namespace UndertaleModTool.Windows
 
             if (!isInAssembly)
             {
-                decompileContext = new ThreadLocal<GlobalDecompileContext>(() => new GlobalDecompileContext(mainWindow.Data, false));
+                globalDecompileContext = new(mainWindow.Data);
+                decompileSettings = mainWindow.Data.ToolInfo.DecompilerSettings;
 
                 // HACK: This could be problematic
-                usingGMLCache = await mainWindow.GenerateGMLCache(decompileContext, loaderDialog);
+                usingGMLCache = await mainWindow.GenerateGMLCache(globalDecompileContext, loaderDialog);
 
                 // If we run script before opening any code
-                if (!usingGMLCache && mainWindow.Data.KnownSubFunctions is null)
+                if (!usingGMLCache && mainWindow.Data.GlobalFunctions is null)
                 {
                     loaderDialog.Maximum = null;
-                    loaderDialog.Update("Building the cache of all sub-functions...");
+                    loaderDialog.Update("Building the cache of all global functions...");
 
-                    await Task.Run(() => Decompiler.BuildSubFunctionCache(mainWindow.Data));
+                    await Task.Run(() => GlobalDecompileContext.BuildGlobalFunctionCache(mainWindow.Data));
                 }
             }
 
@@ -176,7 +178,7 @@ namespace UndertaleModTool.Windows
                 {
                     var codeText = isInAssembly
                         ? code.Disassemble(mainWindow.Data.Variables, mainWindow.Data.CodeLocals.For(code))
-                        : Decompiler.Decompile(code, decompileContext.Value);
+                        : new Underanalyzer.Decompiler.DecompileContext(globalDecompileContext, code, decompileSettings).DecompileToString();
                     SearchInCodeText(code.Name.Content, codeText);
                 }
                 
