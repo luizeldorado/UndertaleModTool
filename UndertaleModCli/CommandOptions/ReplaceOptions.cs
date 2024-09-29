@@ -16,7 +16,7 @@ public class ReplaceOptions
     /// <summary>
     /// File path to where to save the modified data file
     /// </summary>
-    public FileInfo? Output { get; set; }
+    public FileInfo Output { get; set; }
 
     /// <summary>
     /// Determines if Cli should print out verbose logs
