@@ -6,11 +6,8 @@ using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.Globalization;
-using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Data;
@@ -24,7 +21,7 @@ namespace UndertaleModTool
 {
     // TODO: "Bitmap" is Windows-only.
 
-    #pragma warning disable CA1416
+#pragma warning disable CA1416
     public class UndertaleCachedImageLoader : IValueConverter
     {
         [DllImport("gdi32.dll", EntryPoint = "DeleteObject")]
@@ -547,5 +544,5 @@ namespace UndertaleModTool
             return spriteSrc;
         }
     }
-    #pragma warning restore CA1416
+#pragma warning restore CA1416
 }

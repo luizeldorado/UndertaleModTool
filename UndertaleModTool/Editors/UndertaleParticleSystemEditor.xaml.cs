@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace UndertaleModTool
+﻿namespace UndertaleModTool
 {
     /// <summary>
     /// Interaction logic for UndertaleParticleSystemEditor.xaml

@@ -9,7 +9,7 @@ namespace UndertaleModTool
     {
         public Visibility trueValue { get; set; }
         public Visibility falseValue { get; set; }
-        
+
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
             return (value is bool boolean && boolean) ? trueValue : falseValue;

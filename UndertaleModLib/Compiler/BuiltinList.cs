@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using UndertaleModLib.Models;
+﻿using System.Collections.Generic;
 using static UndertaleModLib.Models.UndertaleGeneralInfo;
 
 
@@ -125,7 +120,7 @@ namespace UndertaleModLib.Compiler
         public int Argument0ID = 0;
         public int Argument15ID = 0;
 
-        public BuiltinList() 
+        public BuiltinList()
         {
             Initialize(null);
         }

@@ -1,6 +1,6 @@
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System;
 using Underanalyzer;
 using Underanalyzer.Decompiler;
 using Underanalyzer.Decompiler.GameSpecific;

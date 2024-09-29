@@ -1,12 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using UndertaleModLib.Models;
 
 namespace UndertaleModLib.Decompiler
@@ -453,18 +450,18 @@ namespace UndertaleModLib.Decompiler
                 // Adjust VARI instance type based on existing type
                 variInstanceType = instance switch
                 {
-                    >= 0                                        => UndertaleInstruction.InstanceType.Self,
-                    UndertaleInstruction.InstanceType.Other     => UndertaleInstruction.InstanceType.Self,
-                    UndertaleInstruction.InstanceType.Arg       => UndertaleInstruction.InstanceType.Builtin,
-                    UndertaleInstruction.InstanceType.Builtin   => UndertaleInstruction.InstanceType.Self,      // used with @@This@@
-                    UndertaleInstruction.InstanceType.Stacktop  => UndertaleInstruction.InstanceType.Self,      // used with @@GetInstance@@
-                    _                                           => instance
+                    >= 0 => UndertaleInstruction.InstanceType.Self,
+                    UndertaleInstruction.InstanceType.Other => UndertaleInstruction.InstanceType.Self,
+                    UndertaleInstruction.InstanceType.Arg => UndertaleInstruction.InstanceType.Builtin,
+                    UndertaleInstruction.InstanceType.Builtin => UndertaleInstruction.InstanceType.Self, // used with @@This@@
+                    UndertaleInstruction.InstanceType.Stacktop => UndertaleInstruction.InstanceType.Self, // used with @@GetInstance@@
+                    _ => instance
                 };
 
                 // Set up for parsing after the dot
                 strPosition = instanceTypeDot + 1;
             }
-            
+
             // Parse variable type, if present here, as well as the alternate location of the instance type, if present (directly after it)
             if (strPosition < str.Length && str[strPosition] == '[')
             {

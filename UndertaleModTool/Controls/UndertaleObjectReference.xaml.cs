@@ -68,7 +68,7 @@ namespace UndertaleModTool
         public static DependencyProperty ObjectEventSubtypeProperty =
             DependencyProperty.Register("ObjectEventSubtype", typeof(uint),
                 typeof(UndertaleObjectReference),
-                new FrameworkPropertyMetadata((uint) 0,
+                new FrameworkPropertyMetadata((uint)0,
                     FrameworkPropertyMetadataOptions.BindsTwoWayByDefault));
 
         public static readonly DependencyProperty RoomProperty =
@@ -144,7 +144,7 @@ namespace UndertaleModTool
             var label = TryFindResource("emptyReferenceLabel") as Label;
             if (label is null)
                 return;
-            
+
             string typeName = ObjectType.ToString();
             string n = "";
             if (typeName.StartsWith("UndertaleModLib.Models.Undertale"))
@@ -156,7 +156,7 @@ namespace UndertaleModTool
             // If the first letter is a vowel
             if (Array.IndexOf(vowels, typeName[0]) != -1)
                 n = "n";
-                
+
             label.Content = $"(drag & drop a{n} {typeName})";
         }
 
@@ -214,7 +214,7 @@ namespace UndertaleModTool
             code.Name = nameString;
 
             data.Code.Add(code);
-            
+
             UndertaleCodeLocals.LocalVar argsLocal = new UndertaleCodeLocals.LocalVar();
             argsLocal.Name = data.Strings.MakeString("arguments");
             argsLocal.Index = 0;

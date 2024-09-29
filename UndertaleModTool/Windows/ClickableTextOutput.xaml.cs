@@ -1,18 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
 using static UndertaleModTool.UndertaleCodeEditor;
 
 namespace UndertaleModTool.Windows
@@ -31,10 +24,10 @@ namespace UndertaleModTool.Windows
         private readonly IDictionary<string, List<(int lineNum, string codeLine)>> resultsDict;
         private readonly IEnumerable<string> failedList;
         private readonly CodeEditorTab editorTab;
-        
+
         public ClickableTextOutput(string title, string query, int resultsCount, IOrderedEnumerable<KeyValuePair<string, List<(int lineNum, string codeLine)>>> resultsDict, bool editorDecompile, IOrderedEnumerable<string> failedList = null)
         {
-            #pragma warning disable CA1416
+#pragma warning disable CA1416
             InitializeComponent();
 
             linkContextMenu = FindResource("linkContextMenu") as ContextMenuDark;
@@ -45,11 +38,11 @@ namespace UndertaleModTool.Windows
             this.resultsDict = resultsDict.ToDictionary(x => x.Key, x => x.Value);
             this.editorTab = editorDecompile ? CodeEditorTab.Decompiled : CodeEditorTab.Disassembly;
             this.failedList = failedList?.ToList();
-            #pragma warning restore CA1416
+#pragma warning restore CA1416
         }
         public ClickableTextOutput(string title, string query, int resultsCount, IDictionary<string, List<(int lineNum, string codeLine)>> resultsDict, bool editorDecompile, IEnumerable<string> failedList = null)
         {
-            #pragma warning disable CA1416
+#pragma warning disable CA1416
             InitializeComponent();
 
             linkContextMenu = FindResource("linkContextMenu") as ContextMenuDark;
@@ -60,7 +53,7 @@ namespace UndertaleModTool.Windows
             this.resultsDict = resultsDict;
             this.editorTab = editorDecompile ? CodeEditorTab.Decompiled : CodeEditorTab.Disassembly;
             this.failedList = failedList;
-            #pragma warning restore CA1416
+#pragma warning restore CA1416
         }
         private void Window_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
@@ -195,7 +188,8 @@ namespace UndertaleModTool.Windows
             {
                 Thread.Sleep(500);
 
-                bool done = Dispatcher.Invoke(delegate {
+                bool done = Dispatcher.Invoke(delegate
+                {
                     if (OutTextBox.ExtentHeight > prevEnd) //if length increased
                     {
                         if (FillingLabel.Visibility != Visibility.Visible)
@@ -239,7 +233,7 @@ namespace UndertaleModTool.Windows
                     e.Handled = true;
                     return;
                 }
-                    
+
                 if (e.ChangedButton == MouseButton.Right && linkContextMenu is not null)
                 {
                     linkContextMenu.DataContext = (lineNum, codeName);

@@ -1,6 +1,4 @@
-﻿using System.Windows.Controls;
-
-namespace UndertaleModTool
+﻿namespace UndertaleModTool
 {
     /// <summary>
     /// Logika interakcji dla klasy UndertaleEmbeddedImageEditor.xaml

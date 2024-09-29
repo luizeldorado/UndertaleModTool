@@ -26,7 +26,7 @@ namespace UndertaleModLib
                 writer.SubmitMessage("Writing chunk " + Name);
                 lenWriter.FromHere();
                 SerializeChunk(writer);
-                
+
                 if (Name != "FORM" && Name != writer.LastChunkName)
                 {
                     UndertaleGeneralInfo generalInfo = Name == "GEN8" ? ((UndertaleChunkGEN8)this).Object : writer.undertaleData?.GeneralInfo;

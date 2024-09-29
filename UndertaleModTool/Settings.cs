@@ -1,12 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
-using System.Linq;
-using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using System.Threading.Tasks;
 using System.Windows;
 using Underanalyzer.Decompiler;
 
@@ -115,7 +111,7 @@ namespace UndertaleModTool
                     // Update settings to new version on disk as well
                     Save();
                 }
-            } 
+            }
             catch (Exception e)
             {
                 MessageBox.Show($"Failed to load settings.json! Using default values.\n{e.Message}");

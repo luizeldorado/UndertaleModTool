@@ -1,23 +1,23 @@
-﻿using Microsoft.CodeAnalysis.CSharp.Scripting;
-using Microsoft.CodeAnalysis.Scripting;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Reflection;
-using UndertaleModLib;
-using UndertaleModLib.Scripting;
-using UndertaleModLib.Util;
-using static UndertaleModLib.UndertaleReader;
 using System.CommandLine;
-using System.CommandLine.Invocation;
 using System.CommandLine.Builder;
+using System.CommandLine.Invocation;
 using System.CommandLine.Parsing;
+using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using UndertaleModLib.Models;
+using Microsoft.CodeAnalysis.CSharp.Scripting;
+using Microsoft.CodeAnalysis.Scripting;
 using Newtonsoft.Json;
+using UndertaleModLib;
+using UndertaleModLib.Models;
+using UndertaleModLib.Scripting;
+using UndertaleModLib.Util;
+using static UndertaleModLib.UndertaleReader;
 
 namespace UndertaleModCli;
 
@@ -490,77 +490,77 @@ public partial class Program : IScriptInterface
                 // 1 - run script
                 case ConsoleKey.NumPad1:
                 case ConsoleKey.D1:
-                {
-                    Console.Write("File path (you can drag and drop)? ");
-                    string path = RemoveQuotes(Console.ReadLine());
-                    Console.WriteLine("Trying to run script {0}", path);
-                    try
                     {
-                        RunCSharpFile(path);
-                    }
-                    catch (Exception)
-                    {
-                        // ignored
-                    }
+                        Console.Write("File path (you can drag and drop)? ");
+                        string path = RemoveQuotes(Console.ReadLine());
+                        Console.WriteLine("Trying to run script {0}", path);
+                        try
+                        {
+                            RunCSharpFile(path);
+                        }
+                        catch (Exception)
+                        {
+                            // ignored
+                        }
 
-                    break;
-                }
+                        break;
+                    }
 
                 // 2 - run c# string
                 case ConsoleKey.NumPad2:
                 case ConsoleKey.D2:
-                {
-                    Console.Write("C# code line? ");
-                    string line = Console.ReadLine();
-                    ScriptPath = null;
-                    RunCSharpCode(line);
-                    break;
-                }
+                    {
+                        Console.Write("C# code line? ");
+                        string line = Console.ReadLine();
+                        ScriptPath = null;
+                        RunCSharpCode(line);
+                        break;
+                    }
 
                 // Save and overwrite data file
                 case ConsoleKey.NumPad3:
                 case ConsoleKey.D3:
-                {
-                    SaveDataFile(FilePath);
-                    break;
-                }
+                    {
+                        SaveDataFile(FilePath);
+                        break;
+                    }
 
                 // Save data file to different path
                 case ConsoleKey.NumPad4:
                 case ConsoleKey.D4:
-                {
-                    Console.Write("Where to save? ");
-                    string path = RemoveQuotes(Console.ReadLine());
-                    SaveDataFile(path);
-                    break;
-                }
+                    {
+                        Console.Write("Where to save? ");
+                        string path = RemoveQuotes(Console.ReadLine());
+                        SaveDataFile(path);
+                        break;
+                    }
 
                 // Print out Quick Info
                 case ConsoleKey.NumPad5:
                 case ConsoleKey.D5:
-                {
-                    CliQuickInfo();
-                    break;
-                }
+                    {
+                        CliQuickInfo();
+                        break;
+                    }
 
                 // Quit
                 case ConsoleKey.NumPad6:
                 case ConsoleKey.D6:
-                {
-                    Console.WriteLine("Are you SURE? You can press 'n' and save before the changes are gone forever!!!");
-                    Console.WriteLine("(Y/N)? ");
-                    bool isInputYes = Console.ReadKey(false).Key == ConsoleKey.Y;
-                    Console.WriteLine();
-                    if (isInputYes) return;
+                    {
+                        Console.WriteLine("Are you SURE? You can press 'n' and save before the changes are gone forever!!!");
+                        Console.WriteLine("(Y/N)? ");
+                        bool isInputYes = Console.ReadKey(false).Key == ConsoleKey.Y;
+                        Console.WriteLine();
+                        if (isInputYes) return;
 
-                    break;
-                }
+                        break;
+                    }
 
                 default:
-                {
-                    Console.WriteLine("Unknown input. Try using the upper line of digits on your keyboard.");
-                    break;
-                }
+                    {
+                        Console.WriteLine("Unknown input. Try using the upper line of digits on your keyboard.");
+                        break;
+                    }
             }
         }
     }
@@ -843,7 +843,7 @@ public partial class Program : IScriptInterface
     /// </summary>
     /// <param name="message">Not used.</param>
     private static void DummyHandler(string message)
-    {  }
+    { }
 
     //TODO: document these as well
     private void ProgressUpdater()

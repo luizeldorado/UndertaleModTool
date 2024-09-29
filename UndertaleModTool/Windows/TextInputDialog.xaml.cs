@@ -20,7 +20,7 @@ namespace UndertaleModTool
         public bool IsMultiline { get; set; }
         public bool IsReadOnly { get; set; } = false;
 
-        public TextInputDialog(string titleText, string labelText, string defaultInputBoxText="", string cancelButtonText="Cancel", string submitButtonText="Submit", bool isMultiline=false, bool preventClose=false)
+        public TextInputDialog(string titleText, string labelText, string defaultInputBoxText = "", string cancelButtonText = "Cancel", string submitButtonText = "Submit", bool isMultiline = false, bool preventClose = false)
         {
             InitializeComponent();
 
@@ -31,7 +31,7 @@ namespace UndertaleModTool
             ButtonTitle = submitButtonText;
             CancelButtonTitle = cancelButtonText;
             InputText = defaultInputBoxText;
-            
+
             this.DataContext = this;
         }
         private void Window_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)

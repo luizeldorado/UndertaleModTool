@@ -37,7 +37,7 @@ namespace UndertaleModTool
                 }
                 catch { }
 
-                return res; 
+                return res;
             }
             else
                 return num;

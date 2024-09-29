@@ -42,7 +42,7 @@ namespace UndertaleModTool.Windows
         ConcurrentBag<string> failedList;
         IEnumerable<KeyValuePair<string, List<(int, string)>>> resultsDictSorted;
         IEnumerable<string> failedListSorted;
-        
+
         Regex keywordRegex;
 
         GlobalDecompileContext globalDecompileContext;
@@ -181,7 +181,7 @@ namespace UndertaleModTool.Windows
                         : new Underanalyzer.Decompiler.DecompileContext(globalDecompileContext, code, decompileSettings).DecompileToString();
                     SearchInCodeText(code.Name.Content, codeText);
                 }
-                
+
             }
             // TODO: Look at specific exceptions
             catch (Exception)
@@ -250,7 +250,7 @@ namespace UndertaleModTool.Windows
             StatusBarTextBlock.Text = str;
         }
 
-        void OpenSelectedListViewItem(bool inNewTab=false)
+        void OpenSelectedListViewItem(bool inNewTab = false)
         {
             foreach (Result result in ResultsListView.SelectedItems)
             {

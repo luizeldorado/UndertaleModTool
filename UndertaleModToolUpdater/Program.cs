@@ -14,7 +14,7 @@ namespace UndertaleModToolUpdater
 
             // Get all processes named UndertaleModTool
             Process[] utmtInstances = Process.GetProcessesByName("UndertaleModTool");
-            
+
             if (utmtInstances.Length > 0)
             {
                 // Found some! Wait for all of them to close
@@ -29,7 +29,8 @@ namespace UndertaleModToolUpdater
             string appPath = null;
 
             // Check if Update.zip actually exists
-            if (!File.Exists(basePath + "Update.zip")) {
+            if (!File.Exists(basePath + "Update.zip"))
+            {
                 Console.WriteLine("Update.zip is missing! This program is not meant to be ran by itself, please update through UndertaleModTool.");
                 Console.WriteLine("Press any key to exit...");
                 Console.Read();
@@ -72,7 +73,7 @@ namespace UndertaleModToolUpdater
                 WorkingDirectory = appPath,
                 Arguments = "deleteTempFolder"
             });
-            
+
             Environment.Exit(0);
         }
 
@@ -92,7 +93,7 @@ namespace UndertaleModToolUpdater
                     var targetFile = Path.Combine(targetFolder, Path.GetFileName(file));
                     if (File.Exists(targetFile))
                         File.Delete(targetFile);
-                    
+
                     File.Move(file, targetFile);
                 }
             }

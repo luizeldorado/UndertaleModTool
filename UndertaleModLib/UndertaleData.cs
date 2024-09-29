@@ -46,7 +46,7 @@ namespace UndertaleModLib
                 // Prevent recursion
                 if (resourceTypeName == "Item")
                     return;
-                
+
                 var property = GetType().GetProperty(resourceTypeName);
                 if (property is null)
                     throw new MissingMemberException($"\"UndertaleData\" doesn't contain a property named \"{resourceTypeName}\".");

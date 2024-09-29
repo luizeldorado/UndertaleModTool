@@ -421,7 +421,8 @@ namespace UndertaleModLib.Compiler
                     if (context.Location != null)
                     {
                         msg += string.Format(" around line {0}, column {1}", context.Location.Line, context.Location.Column);
-                    } else if (context.Kind == TokenKind.EOF)
+                    }
+                    else if (context.Kind == TokenKind.EOF)
                     {
                         msg += " around EOF (end of file)";
                     }
@@ -489,7 +490,7 @@ namespace UndertaleModLib.Compiler
                     else if (tokens[i].Kind == TokenKind.Identifier)
                     {
                         // Convert identifiers into their proper references, at least sort of.
-                        if ((i != 0 && tokens[i - 1].Kind == TokenKind.Dot) || 
+                        if ((i != 0 && tokens[i - 1].Kind == TokenKind.Dot) ||
                             !ResolveIdentifier(context, tokens[i].Content, out ExpressionConstant constant))
                         {
                             int ID = GetVariableID(context, tokens[i].Content, out _);
@@ -583,7 +584,7 @@ namespace UndertaleModLib.Compiler
                 // This should be safe since struct functions should only be used in one place each
                 while (usableStructNames.Count > 0)
                     context.FunctionsToObliterate.Add(usableStructNames.Dequeue());
-                
+
                 // Resolve all enum values to their constants
                 ResolveEnumDeclarations(context);
 
@@ -721,7 +722,7 @@ namespace UndertaleModLib.Compiler
                 Statement args = new Statement();
                 bool expressionMode = true;
                 Statement destination = null;
-                
+
                 FunctionParseInfo info = new();
                 context.FunctionParseStack.Push(info);
                 context.FunctionParseInfo[result] = info;
@@ -1274,7 +1275,7 @@ namespace UndertaleModLib.Compiler
                 if (EnsureTokenKind(TokenKind.CloseParen) == null) return null;
 
                 // Check for proper argument count, at least for builtins
-                if (context.BuiltInList.Functions.TryGetValue(s.Text, out FunctionInfo fi) && 
+                if (context.BuiltInList.Functions.TryGetValue(s.Text, out FunctionInfo fi) &&
                     fi.ArgumentCount != -1 && result.Children.Count != fi.ArgumentCount)
                     ReportCodeError(string.Format("Function {0} expects {1} arguments, got {2}.",
                                                   s.Text, fi.ArgumentCount, result.Children.Count)
@@ -1337,7 +1338,7 @@ namespace UndertaleModLib.Compiler
                     {
                         result.Children.Add(ParseAndOp(context));
                     }
-                    
+
                     return result;
                 }
                 else
@@ -1615,7 +1616,7 @@ namespace UndertaleModLib.Compiler
                 if (context.BuiltInList.Functions.ContainsKey(s.Text) || context.scripts.Contains(s.Text))
                 {
                     //ReportCodeError(string.Format("Variable name {0} cannot be used; a function or script already has the name.", s.Text), false);
-                    return new Statement(Statement.StatementKind.ExprFuncName, s.Token) { ID = s.ID };       
+                    return new Statement(Statement.StatementKind.ExprFuncName, s.Token) { ID = s.ID };
                 }
 
                 Statement result = new Statement(Statement.StatementKind.ExprSingleVariable, s.Token);
@@ -1827,7 +1828,7 @@ namespace UndertaleModLib.Compiler
                 function.Text = varName;
                 Statement args = new Statement();
                 Statement destination = new Statement(Statement.StatementKind.ExprFuncName, result.Token)
-                    { ID = procVar.ID, Text = varName };
+                { ID = procVar.ID, Text = varName };
                 Statement body = new Statement();
 
                 function.Children.Add(new Statement(Statement.StatementKind.Token, new Lexer.Token(TokenKind.KeywordConstructor))); // ensure it's a constructor function
@@ -1954,7 +1955,7 @@ namespace UndertaleModLib.Compiler
                                 result.Children[i] = Optimize(context, result.Children[i]);
                         }
                     }
-                } 
+                }
                 else
                     result = new Statement(s);
                 Statement child0 = result.Children[0];
@@ -1999,7 +2000,8 @@ namespace UndertaleModLib.Compiler
                                             accessorFunc.Children.Insert(0, left);
                                             accessorFunc.Children.Add(Optimize(context, result.Children[2]));
                                             return accessorFunc;
-                                        } else
+                                        }
+                                        else
                                         {
                                             // Not the final set function
                                             Statement accessorFunc = new Statement(Statement.StatementKind.ExprFunctionCall, ai.RFunc);
@@ -2026,7 +2028,8 @@ namespace UndertaleModLib.Compiler
                             {
                                 result.Children[i] = Optimize(context, result.Children[i]);
                             }
-                        } else
+                        }
+                        else
                         {
                             for (int i = 0; i < result.Children.Count; i++)
                             {
@@ -2370,7 +2373,8 @@ namespace UndertaleModLib.Compiler
                         ai = context.BuiltInList.Accessors1D[kind];
                     else
                         ReportCodeError("Accessor has incorrect number of arguments", s.Children[0].Token, false);
-                } else
+                }
+                else
                 {
                     if (context.BuiltInList.Accessors2D.ContainsKey(kind))
                         ai = context.BuiltInList.Accessors2D[kind];

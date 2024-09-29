@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using UndertaleModLib.Models;
@@ -21,7 +20,7 @@ namespace UndertaleModLib.Decompiler
                 sb.AppendLine("; Missing code locals, possibly due to unsupported bytecode version or brand new code entry.");
                 return;
             }
-            
+
             var referenced = code.FindReferencedLocalVars();
             if (locals.Name != code.Name)
                 throw new Exception("Name of the locals block does not match name of the code block!");
@@ -40,7 +39,7 @@ namespace UndertaleModLib.Decompiler
                 sb.AppendLine();
             }
         }
-        
+
         public static string Disassemble(this UndertaleCode code, IList<UndertaleVariable> vars, UndertaleCodeLocals locals)
         {
             // This StringBuilder is shared with the ToString method of the code instructions.

@@ -1,12 +1,7 @@
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 using UndertaleModLib.Models;
 using UndertaleModLib.Util;
 using static UndertaleModLib.Models.UndertaleRoom;
@@ -469,7 +464,7 @@ namespace UndertaleModLib
                     // We can't determine anything from this sprite
                     continue;
                 }
-                
+
                 reader.Position += 28;
 
                 if (reader.ReadInt32() != -1)
@@ -680,16 +675,16 @@ namespace UndertaleModLib
         private static bool checkedFor2023_6;
         private void CheckForGM2022_2(UndertaleReader reader)
         {
-           /* This code performs four checks to identify GM2022.2.
-            * First, as you've seen, is the bytecode version.
-            * Second, we assume it is. If there are no Glyphs, we are vindicated by the impossibility of null values there.
-            * Third, we check that the Glyph Length is less than the chunk length. If it's going outside the chunk, that means
-            * that the length was misinterpreted.
-            * Fourth, in case of a terrible fluke causing this to appear valid erroneously, we verify that each pointer leads into the next.
-            * And if someone builds their game so the first pointer is absolutely valid length data and the next font is valid glyph data-
-            * screw it, call Jacky720 when someone constructs that and you want to mod it.
-            * Maybe try..catch on the whole shebang?
-            */
+            /* This code performs four checks to identify GM2022.2.
+             * First, as you've seen, is the bytecode version.
+             * Second, we assume it is. If there are no Glyphs, we are vindicated by the impossibility of null values there.
+             * Third, we check that the Glyph Length is less than the chunk length. If it's going outside the chunk, that means
+             * that the length was misinterpreted.
+             * Fourth, in case of a terrible fluke causing this to appear valid erroneously, we verify that each pointer leads into the next.
+             * And if someone builds their game so the first pointer is absolutely valid length data and the next font is valid glyph data-
+             * screw it, call Jacky720 when someone constructs that and you want to mod it.
+             * Maybe try..catch on the whole shebang?
+             */
             if (reader.undertaleData.GeneralInfo?.BytecodeVersion < 17 || reader.undertaleData.IsVersionAtLeast(2022, 2))
             {
                 checkedFor2022_2 = true;
@@ -739,7 +734,7 @@ namespace UndertaleModLib
         private void CheckForGM2023_6(UndertaleReader reader)
         {
             // This is basically the same as the 2022.2 check, but adapted for the LineHeight value instead of Ascender.
-            
+
             // We already know whether the version is more or less than 2022.8 due to FEAT. Checking a shorter range narrows possibility of error.
             // PSEM (2023.2) is not used, as it would return a false negative on LTS (2022.9+ equivalent with no particles).
             if (!reader.undertaleData.IsVersionAtLeast(2022, 8) || reader.undertaleData.IsVersionAtLeast(2023, 6))
@@ -801,7 +796,8 @@ namespace UndertaleModLib
                     writer.Write(i);
                 for (ushort i = 0; i < 0x80; i++)
                     writer.Write((ushort)0x3f);
-            } else
+            }
+            else
                 writer.Write(Padding);
         }
 
@@ -1418,7 +1414,7 @@ namespace UndertaleModLib
                 return 0;
 
             uint count = 0;
-            
+
             if (!reader.Bytecode14OrLower)
             {
                 count += 1 + UndertaleSimpleList<UndertaleFunction>.UnserializeChildObjectCount(reader);
@@ -2246,7 +2242,7 @@ namespace UndertaleModLib
                 reader.AbsPosition = positionToReturn;
                 throw new IOException("Unrecognized PSEM size with " + count + " elements");
             }
-            
+
 
             reader.AbsPosition = positionToReturn;
             checkedPsemVersion = true;

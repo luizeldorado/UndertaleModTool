@@ -391,7 +391,7 @@ public class GMImage
 
             // Check if rest of bytes are 0x00 padded
             byte[] paddingBytes = reader.ReadBytes((int)(maxEndOfStreamPosition - reader.Position));
-            for (int i=0; i<paddingBytes.Length; i++)
+            for (int i = 0; i < paddingBytes.Length; i++)
             {
                 if (paddingBytes[i] != 0)
                     throw new IOException("Non-zero bytes in padding");
@@ -599,7 +599,7 @@ public class GMImage
             case ImageFormat.Bz2Qoi:
                 {
                     GMImage rawImage;
-                    
+
                     using (MemoryStream uncompressedData = new(GetInitialUncompressedBufferCapacity()))
                     {
                         // Decompress BZ2 data

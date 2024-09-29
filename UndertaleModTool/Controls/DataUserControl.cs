@@ -4,7 +4,7 @@ namespace UndertaleModTool
 {
     public partial class DataUserControl : System.Windows.Controls.UserControl
     {
-        public DataUserControl() 
+        public DataUserControl()
         {
         }
 

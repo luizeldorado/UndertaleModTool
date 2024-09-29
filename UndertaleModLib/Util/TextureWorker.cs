@@ -1,7 +1,7 @@
-﻿using ImageMagick;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using ImageMagick;
 using UndertaleModLib.Models;
 
 namespace UndertaleModLib.Util

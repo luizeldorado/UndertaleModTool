@@ -1,5 +1,4 @@
 using System.Text;
-using UndertaleModLib.Compiler;
 
 namespace UndertaleModLib.Util;
 
@@ -47,7 +46,7 @@ public struct StringBuilderHelper
     {
         Position = 0;
     }
-    
+
     /// <summary>
     /// Initializes a new <see cref="StringBuilderHelper"/> instance with a specific position.
     /// </summary>
@@ -70,7 +69,7 @@ public struct StringBuilderHelper
             sb.Insert(Position, value);
         Position += value.Length;
     }
-    
+
     /// <summary>
     /// Appends the specified char to a <see cref="StringBuilder"/> at <see cref="Position"/> and increases it afterwards.
     /// </summary>
@@ -84,29 +83,29 @@ public struct StringBuilderHelper
             sb.Insert(Position, value);
         Position += 1;
     }
-    
+
     /// <summary>
     /// <inheritdoc cref="StringBuilderHelper.Append(StringBuilder, string)"/>
     /// </summary>
     /// <param name="sb">An instance on where a string should be appended to.</param>
     /// <param name="value"><inheritdoc cref="StringBuilder.Append(object)"/></param>
     public void Append(StringBuilder sb, object value) => this.Append(sb, value.ToString());
-    
+
     /// <summary>
     /// <inheritdoc cref="StringBuilderHelper.Append(StringBuilder, string)"/>
     /// </summary>
     /// <param name="sb">An instance on where a string should be appended to.</param>
     /// <param name="value"><inheritdoc cref="StringBuilder.Append(int)"/></param>
     public void Append(StringBuilder sb, int value) => this.Append(sb, value.ToString());
-    
+
     /// <summary>
     /// <inheritdoc cref="StringBuilderHelper.Append(StringBuilder, string)"/>
     /// </summary>
     /// <param name="sb">An instance on where a string should be appended to.</param>
     /// <param name="value"><inheritdoc cref="StringBuilder.Append(byte)"/></param>
     public void Append(StringBuilder sb, byte value) => this.Append(sb, value.ToString());
-    
-    
-    
+
+
+
     // Add more overloads as needed.
 }

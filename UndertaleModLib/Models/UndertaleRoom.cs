@@ -221,7 +221,7 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
 
         for (int i = 0; i < orderedLayers.Length; i++)
         {
-                Layers[i] = orderedLayers[i];
+            Layers[i] = orderedLayers[i];
         }
     }
 
@@ -245,7 +245,7 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
 
     /// <inheritdoc />
     public event PropertyChangedEventHandler PropertyChanged;
-    
+
     /// <summary>
     /// Invoked whenever the effective value of any dependency property has been updated.
     /// </summary>
@@ -409,7 +409,7 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
                                 Debug.WriteLine($"The object instance with ID {id} of a layer (ID {layer.LayerId}) is not found.");
                                 continue;
                             }
-                            
+
                             layer.InstancesData.Instances.Add(GameObjects[foundIndex + 1]);
                         }
                     }
@@ -502,8 +502,8 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
                     tileList = tileList.Concat(layer.AssetsData.LegacyTiles);
                 else if (layer.LayerType == LayerType.Tiles && layer.TilesData.TileData.Length != 0)
                 {
-                    int w = (int) (Width / layer.TilesData.TilesX);
-                    int h = (int) (Height / layer.TilesData.TilesY);
+                    int w = (int)(Width / layer.TilesData.TilesX);
+                    int h = (int)(Height / layer.TilesData.TilesY);
                     tileSizes[new(w, h)] = layer.TilesData.TilesX * layer.TilesData.TilesY;
                 }
             }
@@ -515,7 +515,7 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
         // Loop through each tile and save how many times their sizes are used
         foreach (Tile tile in tileList)
         {
-            Point scale = new((int) tile.Width, (int) tile.Height);
+            Point scale = new((int)tile.Width, (int)tile.Height);
             if (tileSizes.ContainsKey(scale))
                 tileSizes[scale]++;
             else
@@ -1798,7 +1798,7 @@ public class UndertaleRoom : UndertaleNamedResource, INotifyPropertyChanged, IDi
                     tile = reader.ReadUInt32();
 
                     // sanity check: run of 2 empty tiles
-                    if (length != 0x81) 
+                    if (length != 0x81)
                         throw new IOException("Expected 0x81, got 0x" + length.ToString("X2"));
                     if (tile != unchecked((uint)-1))
                         throw new IOException("Expected -1, got " + tile + " (0x" + tile.ToString("X8") + ")");
