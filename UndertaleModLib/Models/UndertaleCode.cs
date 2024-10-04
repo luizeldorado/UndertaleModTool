@@ -879,7 +879,6 @@ public class UndertaleInstruction : UndertaleObject, IGMInstruction
                             reader.undertaleData.SetGMS2Version(2024, 4);
                     }
                 }
-
                 // If this is a chknullish instruction (ID -10), then this implies GameMaker 2.3.7 or above
                 if (value == -10 && reader.undertaleData.IsVersionAtLeast(2, 3))
                 {
