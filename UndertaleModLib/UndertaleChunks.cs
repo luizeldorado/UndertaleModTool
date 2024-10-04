@@ -2211,7 +2211,8 @@ namespace UndertaleModLib
                 // Fortunately, consistent padding means we need no parsing here
                 if (Length == 0xF8)
                 {
-                    reader.undertaleData.SetGMS2Version(2023, 8);
+                    if (!reader.undertaleData.IsVersionAtLeast(2023, 8))
+                        reader.undertaleData.SetGMS2Version(2023, 8);
                 }
                 else if (Length == 0xD8)
                 {
@@ -2241,7 +2242,8 @@ namespace UndertaleModLib
             uint secondPtr = reader.ReadUInt32();
             if (secondPtr - firstPtr == 0xEC)
             {
-                reader.undertaleData.SetGMS2Version(2023, 8);
+                if (!reader.undertaleData.IsVersionAtLeast(2023, 8))
+                    reader.undertaleData.SetGMS2Version(2023, 8);
             }
             else if (secondPtr - firstPtr == 0xC0)
             {
