@@ -1,16 +1,16 @@
 ﻿using System;
 using System.ComponentModel;
 using System.IO;
+using System.Security.Cryptography;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Threading;
-using UndertaleModLib;
-using UndertaleModLib.Scripting;
-using System.Security.Cryptography;
-using UndertaleModLib.Models;
-using UndertaleModLib.Decompiler;
-using System.Threading.Tasks;
 using Underanalyzer.Decompiler;
+using UndertaleModLib;
+using UndertaleModLib.Decompiler;
+using UndertaleModLib.Models;
+using UndertaleModLib.Scripting;
 
 namespace UndertaleModTool
 {
@@ -30,7 +30,7 @@ namespace UndertaleModTool
             GlobalDecompileContext globalDecompileContext = context is null ? new(Data) : context;
             try
             {
-                return code != null 
+                return code != null
                     ? new Underanalyzer.Decompiler.DecompileContext(globalDecompileContext, code, settings ?? Data.ToolInfo.DecompilerSettings).DecompileToString()
                     : "";
             }

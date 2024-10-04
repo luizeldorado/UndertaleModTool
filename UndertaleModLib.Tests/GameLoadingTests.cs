@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Underanalyzer.Decompiler;
-using UndertaleModLib;
+﻿using Underanalyzer.Decompiler;
 using UndertaleModLib.Decompiler;
 using UndertaleModLib.Models;
 

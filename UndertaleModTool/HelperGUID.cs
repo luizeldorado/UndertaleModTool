@@ -61,7 +61,7 @@ namespace UndertaleModTool
                 }
                 return obj_index;
             }
-            
+
             if (possible_values.Count != 0)
             {
                 // 2 or more possible values, make a list to choose from

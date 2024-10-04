@@ -86,7 +86,7 @@ namespace UndertaleModTool
             {
                 _textureDataContext.PropertyChanged -= ReloadTextureImage;
             }
-            
+
             _textureDataContext = texture.TextureData;
 
             if (_textureDataContext is not null)
@@ -303,7 +303,7 @@ namespace UndertaleModTool
                 pageContextMenu.IsOpen = true;
                 return;
             }
-            
+
             mainWindow.ChangeSelection(hoveredItem, e.ChangedButton == MouseButton.Middle);
         }
 

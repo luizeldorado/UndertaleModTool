@@ -1,13 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Data;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using UndertaleModLib.Models;
 
 namespace UndertaleModTool
 {
@@ -19,7 +15,7 @@ namespace UndertaleModTool
             {
                 return null;
             }
-            
+
             uint width = (uint)values[0];
             uint height = (uint)values[1];
             byte[] data = (byte[])values[2];

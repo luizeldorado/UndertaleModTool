@@ -1,11 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace UndertaleModLib.Util
 {
@@ -19,11 +16,14 @@ namespace UndertaleModLib.Util
         private int currentSize;
         private Encoding encoding;
 
-        public uint Position { get => (uint)offset; set
+        public uint Position
+        {
+            get => (uint)offset; set
             {
                 ResizeToFit((int)value);
                 offset = value;
-            } }
+            }
+        }
 
         public byte[] RawBuffer { get => buffer; }
         public Encoding Encoding { get => encoding; }

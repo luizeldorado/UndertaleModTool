@@ -1,27 +1,42 @@
-﻿using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp.Scripting;
-using Microsoft.CodeAnalysis.Scripting;
-using Microsoft.Win32;
-using Newtonsoft.Json;
-using System;
+﻿using System;
 using System.Collections;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.IO.Compression;
+using System.IO.Pipes;
 using System.Linq;
+using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Reflection;
+using System.Runtime;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using System.Security.Cryptography;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
+using System.Windows.Data;
 using System.Windows.Input;
+using System.Windows.Interop;
 using System.Windows.Media;
+using System.Windows.Media.Imaging;
 using System.Windows.Threading;
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp.Scripting;
+using Microsoft.CodeAnalysis.Scripting;
+using Microsoft.Win32;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using Ookii.Dialogs.Wpf;
 using UndertaleModLib;
 using UndertaleModLib.Decompiler;
 using UndertaleModLib.Models;
@@ -29,24 +44,7 @@ using UndertaleModLib.ModelsDebug;
 using UndertaleModLib.Scripting;
 using UndertaleModLib.Util;
 using UndertaleModTool.Windows;
-using System.IO.Pipes;
-using Ookii.Dialogs.Wpf;
-
-using System.Text.RegularExpressions;
-using System.Windows.Data;
-using System.Security.Cryptography;
-using System.Collections.Concurrent;
-using System.Runtime;
 using SystemJson = System.Text.Json;
-using System.Net.Http;
-using System.Net.Http.Headers;
-using Newtonsoft.Json.Linq;
-using System.Net;
-using System.Globalization;
-using System.Windows.Controls.Primitives;
-using System.Runtime.CompilerServices;
-using System.Windows.Interop;
-using System.Windows.Media.Imaging;
 
 namespace UndertaleModTool
 {
@@ -95,7 +93,7 @@ namespace UndertaleModTool
             {
                 OnPropertyChanged();
                 OpenInTab(value);
-            } 
+            }
         }
 
         public Visibility IsGMS2 => (Data?.GeneralInfo?.Major ?? 0) >= 2 ? Visibility.Visible : Visibility.Collapsed;
@@ -573,7 +571,7 @@ namespace UndertaleModTool
 
             var mainWindow = Application.Current.MainWindow as MainWindow;
             mainWindow.TabController.SetDarkMode(enable);
-            
+
             if (enable)
             {
                 foreach (var pair in appDarkStyle)
@@ -764,8 +762,8 @@ namespace UndertaleModTool
                 Debug.WriteLine(ex);
                 return SaveResult.Error;
             }
-            
-            #pragma warning disable CA1416
+
+#pragma warning disable CA1416
             if (codeEditor.DecompiledChanged || codeEditor.DisassemblyChanged)
             {
                 IsSaving = true;
@@ -776,7 +774,7 @@ namespace UndertaleModTool
                 result = IsSaving ? SaveResult.Error : SaveResult.Saved;
                 IsSaving = false;
             }
-            #pragma warning restore CA1416
+#pragma warning restore CA1416
 
             return result;
         }
@@ -1085,10 +1083,10 @@ namespace UndertaleModTool
                                                       ? "Tile sets"
                                                       : "Backgrounds & Tile sets";
 
-                        #pragma warning disable CA1416
+#pragma warning disable CA1416
                         UndertaleCodeEditor.gettext = null;
                         UndertaleCodeEditor.gettextJSON = null;
-                        #pragma warning restore CA1416
+#pragma warning restore CA1416
                     }
 
                     dialog.Hide();
@@ -1284,9 +1282,9 @@ namespace UndertaleModTool
                     Data.ToolInfo.CurrentMD5 = BitConverter.ToString(MD5CurrentlyLoaded).Replace("-", "").ToLowerInvariant();
                 }
 
-                #pragma warning disable CA1416
+#pragma warning disable CA1416
                 UndertaleCodeEditor.gettextJSON = null;
-                #pragma warning restore CA1416
+#pragma warning restore CA1416
 
                 Dispatcher.Invoke(() =>
                 {
@@ -1313,7 +1311,8 @@ namespace UndertaleModTool
         }
         private async Task LoadGMLCache(string filename, LoaderDialog dialog = null)
         {
-            await Task.Run(() => {
+            await Task.Run(() =>
+            {
                 if (SettingsWindow.UseGMLCache)
                 {
                     string cacheDirPath = Path.Combine(ExePath, "GMLCache");
@@ -1402,7 +1401,8 @@ namespace UndertaleModTool
         }
         private async Task SaveGMLCache(string filename, bool updateCache = true, LoaderDialog dialog = null, bool isDifferentPath = false)
         {
-            await Task.Run(async () => {
+            await Task.Run(async () =>
+            {
                 if (SettingsWindow.UseGMLCache && Data?.GMLCache?.Count > 0 && Data.GMLCacheIsReady && (isDifferentPath || !Data.GMLCacheWasSaved || !Data.GMLCacheChanged.IsEmpty))
                 {
                     dialog?.Dispatcher.Invoke(() => dialog.ReportProgress("Saving decompiled code cache..."));
@@ -1523,7 +1523,7 @@ namespace UndertaleModTool
                     {
                         try
                         {
-                            Data.GMLCache[code.Name.Content] = 
+                            Data.GMLCache[code.Name.Content] =
                                 new Underanalyzer.Decompiler.DecompileContext(decompileContext, code, Data.ToolInfo.DecompilerSettings)
                                     .DecompileToString();
                         }
@@ -1573,7 +1573,7 @@ namespace UndertaleModTool
                         {
                             try
                             {
-                                Data.GMLCache[code.Name.Content] = 
+                                Data.GMLCache[code.Name.Content] =
                                     new Underanalyzer.Decompiler.DecompileContext(decompileContext, code, Data.ToolInfo.DecompilerSettings)
                                         .DecompileToString();
 
@@ -1827,7 +1827,7 @@ namespace UndertaleModTool
             object source = container.ItemsSource;
             IList list = ((source as ICollectionView)?.SourceCollection as IList) ?? (source as IList);
             bool isLast = list.IndexOf(obj) == list.Count - 1;
-            if (this.ShowQuestion("Delete " + obj + "?" + (!isLast ? "\n\nNote that the code often references objects by ID, so this operation is likely to break stuff because other items will shift up!" : ""), isLast ? MessageBoxImage.Question : MessageBoxImage.Warning, "Confirmation" ) == MessageBoxResult.Yes)
+            if (this.ShowQuestion("Delete " + obj + "?" + (!isLast ? "\n\nNote that the code often references objects by ID, so this operation is likely to break stuff because other items will shift up!" : ""), isLast ? MessageBoxImage.Question : MessageBoxImage.Warning, "Confirmation") == MessageBoxResult.Yes)
             {
                 list.Remove(obj);
                 if (obj is UndertaleCode codeObj)
@@ -1882,7 +1882,7 @@ namespace UndertaleModTool
 
                             tab.History.RemoveAt(i);
                             i--;
-                        } 
+                        }
                     }
                 }
             }
@@ -2184,11 +2184,11 @@ namespace UndertaleModTool
                 // exit out early if the path does not exist.
                 if (!directory.Exists)
                 {
-                    item.Items.Add(new MenuItem {Header = $"(Path {folderDir} does not exist, cannot search for files!)", IsEnabled = false});
+                    item.Items.Add(new MenuItem { Header = $"(Path {folderDir} does not exist, cannot search for files!)", IsEnabled = false });
 
                     if (item.Name == "RootScriptItem")
                     {
-                        var otherScripts1 = new MenuItem {Header = "Run _other script..."};
+                        var otherScripts1 = new MenuItem { Header = "Run _other script..." };
                         otherScripts1.Click += MenuItem_RunOtherScript_Click;
                         item.Items.Add(otherScripts1);
                     }
@@ -2201,7 +2201,7 @@ namespace UndertaleModTool
                 {
                     var filename = file.Name;
                     // Replace _ with __ because WPF uses _ for keyboard navigation
-                    MenuItem subitem = new MenuItem {Header = filename.Replace("_", "__")};
+                    MenuItem subitem = new MenuItem { Header = filename.Replace("_", "__") };
                     subitem.Click += MenuItem_RunBuiltinScript_Item_Click;
                     subitem.CommandParameter = file.FullName;
                     item.Items.Add(subitem);
@@ -2215,17 +2215,17 @@ namespace UndertaleModTool
 
                     var subDirName = subDirectory.Name;
                     // In addition to the _ comment from above, we also need to add at least one item, so that WPF uses this as a submenuitem
-                    MenuItemDark subItem = new() {Header = subDirName.Replace("_", "__"), Items = {new MenuItem {Header = "(loading...)", IsEnabled = false}}};
+                    MenuItemDark subItem = new() { Header = subDirName.Replace("_", "__"), Items = { new MenuItem { Header = "(loading...)", IsEnabled = false } } };
                     subItem.SubmenuOpened += (o, args) => MenuItem_RunScript_SubmenuOpened(o, args, subDirectory.FullName);
                     item.Items.Add(subItem);
                 }
 
                 if (item.Items.Count == 0)
-                    item.Items.Add(new MenuItem {Header = "(No scripts found!)", IsEnabled = false});
+                    item.Items.Add(new MenuItem { Header = "(No scripts found!)", IsEnabled = false });
             }
             catch (Exception err)
             {
-                item.Items.Add(new MenuItem {Header = err.ToString(), IsEnabled = false});
+                item.Items.Add(new MenuItem { Header = err.ToString(), IsEnabled = false });
             }
 
             item.UpdateLayout();
@@ -2242,7 +2242,7 @@ namespace UndertaleModTool
             // If we're at the complete root, we need to add the "Run other script" button as well
             if (item.Name != "RootScriptItem") return;
 
-            var otherScripts = new MenuItem {Header = "Run _other script..."};
+            var otherScripts = new MenuItem { Header = "Run _other script..." };
             otherScripts.Click += MenuItem_RunOtherScript_Click;
             item.Items.Add(otherScripts);
         }
@@ -2275,7 +2275,8 @@ namespace UndertaleModTool
         // Apparently, one null check is not enough for `scriptDialog`
         public void UpdateProgressBar(string message, string status, double progressValue, double maxValue)
         {
-            scriptDialog?.Dispatcher.Invoke(DispatcherPriority.Normal, () => {
+            scriptDialog?.Dispatcher.Invoke(DispatcherPriority.Normal, () =>
+            {
                 scriptDialog?.Update(message, status, progressValue, maxValue);
             });
         }
@@ -2293,21 +2294,24 @@ namespace UndertaleModTool
         public void SetProgressBar()
         {
             if (scriptDialog != null && !scriptDialog.IsVisible)
-                scriptDialog.Dispatcher.Invoke(() => {
+                scriptDialog.Dispatcher.Invoke(() =>
+                {
                     scriptDialog?.Show();
                 });
         }
 
         public void UpdateProgressValue(double progressValue)
         {
-            scriptDialog?.Dispatcher.Invoke(DispatcherPriority.Normal, () => {
+            scriptDialog?.Dispatcher.Invoke(DispatcherPriority.Normal, () =>
+            {
                 scriptDialog?.ReportProgress(progressValue);
             });
         }
 
         public void UpdateProgressStatus(string status)
         {
-            scriptDialog?.Dispatcher.Invoke(DispatcherPriority.Normal, () => {
+            scriptDialog?.Dispatcher.Invoke(DispatcherPriority.Normal, () =>
+            {
                 scriptDialog?.ReportProgress(status);
             });
         }
@@ -2492,7 +2496,7 @@ namespace UndertaleModTool
             {
                 Focus();
 
-                #pragma warning disable CA1416
+#pragma warning disable CA1416
                 if (Selected == code)
                 {
                     var codeEditor = FindVisualChild<UndertaleCodeEditor>(DataEditor);
@@ -2527,7 +2531,7 @@ namespace UndertaleModTool
                     UndertaleCodeEditor.EditorTab = editorTab;
                     UndertaleCodeEditor.ChangeLineNumber(lineNum, editorTab);
                 }
-                #pragma warning restore CA1416
+#pragma warning restore CA1416
 
                 HighlightObject(code);
                 ChangeSelection(code, inNewTab);
@@ -2578,7 +2582,7 @@ namespace UndertaleModTool
                 foreach (string traceLine in traceLines)
                 {
                     // Only handle trace lines that come from a script
-                    if (traceLine.TrimStart()[..13] == "at Submission") 
+                    if (traceLine.TrimStart()[..13] == "at Submission")
                     {
                         // Add to total count of expected script trace lines
                         expectedNumScriptTraceLines++;
@@ -2616,7 +2620,7 @@ namespace UndertaleModTool
             // If we found the expected number of script trace lines, then use them; otherwise, use the regular exception text.
             string excText;
             if (loadedScriptLineNums.Count == expectedNumScriptTraceLines)
-            {                
+            {
                 // Read the code for the files to know what the code line associated with the stack trace is
                 Dictionary<string, List<string>> scriptsCode = new();
                 foreach ((string sourceFile, int _) in loadedScriptLineNums)
@@ -2643,7 +2647,7 @@ namespace UndertaleModTool
                 {
                     string scriptName = Path.GetFileName(pair.SourceFile);
                     string scriptLine = scriptsCode[pair.SourceFile][pair.LineNum - 1]; // - 1 because line numbers start from 1
-                    return $"Line {pair.LineNum} in script {scriptName}: {scriptLine}"; 
+                    return $"Line {pair.LineNum} in script {scriptName}: {scriptLine}";
                 }));
 
                 if (exTypesDict is not null)
@@ -2758,7 +2762,7 @@ namespace UndertaleModTool
             return dlg.ShowDialog() == true ? dlg.FileName : null;
         }
 
-        #pragma warning disable CA1416
+#pragma warning disable CA1416
         public string PromptChooseDirectory()
         {
             VistaFolderBrowserDialog folderBrowser = new VistaFolderBrowserDialog();
@@ -2766,13 +2770,13 @@ namespace UndertaleModTool
             return folderBrowser.ShowDialog() == true ? folderBrowser.SelectedPath + "/" : null;
         }
 
-        #pragma warning disable CA1416
+#pragma warning disable CA1416
         public void PlayInformationSound()
         {
             if (Environment.OSVersion.Platform == PlatformID.Win32NT)
                 System.Media.SystemSounds.Asterisk.Play();
         }
-        #pragma warning restore CA1416
+#pragma warning restore CA1416
 
         public void ScriptMessage(string message)
         {
@@ -2989,7 +2993,7 @@ namespace UndertaleModTool
                                   "the Nightly builds if you don't have a GitHub account, or compile UTMT yourself.\n" +
                                   "For any questions or more information, ask in the Underminers Discord server.");
                 window.UpdateButtonEnabled = true;
-                    return;
+                return;
 
             }
 
@@ -3060,7 +3064,7 @@ namespace UndertaleModTool
             }
 
             var artifactInfo = JObject.Parse(await result2.Content.ReadAsStringAsync()); // And now parse them as JSON
-            var artifactList = (JArray) artifactInfo["artifacts"];                       // Grab the array of artifacts
+            var artifactList = (JArray)artifactInfo["artifacts"];                       // Grab the array of artifacts
 
             if (Environment.Is64BitOperatingSystem && !Environment.Is64BitProcess)
             {
@@ -3076,7 +3080,7 @@ namespace UndertaleModTool
             JObject artifact = null;
             for (int index = 0; index < artifactList.Count; index++)
             {
-                var currentArtifact = (JObject) artifactList[index];
+                var currentArtifact = (JObject)artifactList[index];
                 string artifactName = (string)currentArtifact["name"];
 
                 // If the tool ever becomes cross platform this needs to check the OS

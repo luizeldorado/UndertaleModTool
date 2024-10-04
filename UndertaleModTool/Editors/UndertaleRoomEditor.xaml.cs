@@ -1,11 +1,8 @@
-using Microsoft.Win32;
 using System;
 using System.Buffers;
 using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.ComponentModel;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
@@ -14,19 +11,17 @@ using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Windows.Threading;
+using Microsoft.Win32;
 using UndertaleModLib;
 using UndertaleModLib.Models;
 using static UndertaleModLib.Models.UndertaleRoom;
@@ -199,7 +194,7 @@ namespace UndertaleModTool
                             {
                                 foreach (ParticleSystemInstance partSys in layer.AssetsData.ParticleSystems)
                                     partSysInstDict.TryAdd(partSys, layer);
-                                    
+
                                 var particleSystems = layer.AssetsData.ParticleSystems.Select(x => x.ParticleSystem);
                                 ParticleSystemRectConverter.Initialize(particleSystems);
                             }
@@ -707,22 +702,22 @@ namespace UndertaleModTool
                 int tgtX = (int)(mousePos.X - hotpointX);
                 int tgtY = (int)(mousePos.Y - hotpointY);
 
-                int gridWidth  = Math.Max(Convert.ToInt32(room.GridWidth ), 1);
+                int gridWidth = Math.Max(Convert.ToInt32(room.GridWidth), 1);
                 int gridHeight = Math.Max(Convert.ToInt32(room.GridHeight), 1);
 
                 if (Keyboard.Modifiers.HasFlag(ModifierKeys.Control))
                 {
-                    gridWidth  /= 2;
+                    gridWidth /= 2;
                     gridHeight /= 2;
                 }
                 else if (Keyboard.Modifiers.HasFlag(ModifierKeys.Shift))
                 {
-                    gridWidth  *= 2;
+                    gridWidth *= 2;
                     gridHeight *= 2;
                 }
 
                 // Snap to grid
-                tgtX = ((tgtX + gridWidth  / 2) / gridWidth ) * gridWidth;
+                tgtX = ((tgtX + gridWidth / 2) / gridWidth) * gridWidth;
                 tgtY = ((tgtY + gridHeight / 2) / gridHeight) * gridHeight;
 
                 if (movingObj is GameObject gameObj)
@@ -784,7 +779,7 @@ namespace UndertaleModTool
             {
                 double differenceX = gridMouseCoordinates.X - scaleOriginX;
                 double differenceY = gridMouseCoordinates.Y - scaleOriginY;
-                clickedTile.Width  = (uint)Math.Clamp(Math.Abs(differenceX), 0, clickedTile.Tpag.BoundingWidth ) + (uint)room.GridWidth;
+                clickedTile.Width = (uint)Math.Clamp(Math.Abs(differenceX), 0, clickedTile.Tpag.BoundingWidth) + (uint)room.GridWidth;
                 clickedTile.Height = (uint)Math.Clamp(Math.Abs(differenceY), 0, clickedTile.Tpag.BoundingHeight) + (uint)room.GridHeight;
 
                 if (differenceX < 0)
@@ -2168,7 +2163,7 @@ namespace UndertaleModTool
 
                         var roomEditor = MainWindow.FindVisualChild<UndertaleRoomEditor>((Application.Current.MainWindow as MainWindow).DataEditor);
                         selectedLayer = roomEditor?.RoomObjectsTree.SelectedItem as Layer;
-                        
+
                         if (selectedLayer is not null)
                         {
                             Layer[] orderedLayers = room.Layers.OrderBy(l => l.LayerDepth).ToArray();
@@ -2217,7 +2212,7 @@ namespace UndertaleModTool
                                 Window mainWindow = Application.Current?.MainWindow;
                                 mainWindow.ShowError("Room flags of GMS 2+ games must contain the \"IsGMS2\" flag, otherwise the game will crash when loading that room.");
                             }
-                            catch {}
+                            catch { }
                         }
 
                         flags |= RoomEntryFlags.IsGMS2;

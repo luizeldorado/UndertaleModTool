@@ -1,10 +1,6 @@
-﻿using ICSharpCode.SharpZipLib.BZip2;
-using System;
-using System.Buffers.Binary;
+﻿using System;
 using System.ComponentModel;
-using System.Drawing;
 using System.IO;
-using System.Linq;
 using System.Runtime.CompilerServices;
 using UndertaleModLib.Util;
 
@@ -303,8 +299,8 @@ public class UndertaleEmbeddedTexture : UndertaleNamedResource, IDisposable
         /// <summary>
         /// The underlying image of the texture.
         /// </summary>
-        public GMImage Image 
-        { 
+        public GMImage Image
+        {
             get => _image;
             set
             {
@@ -355,7 +351,7 @@ public class UndertaleEmbeddedTexture : UndertaleNamedResource, IDisposable
 
         /// <inheritdoc />
         public event PropertyChangedEventHandler PropertyChanged;
-        
+
         /// <summary>
         /// Invoked whenever the effective value of any dependency property has been updated.
         /// </summary>

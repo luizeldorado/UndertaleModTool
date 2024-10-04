@@ -3,18 +3,14 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Globalization;
 using System.IO;
-using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Markup;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
 using UndertaleModLib;
 using UndertaleModLib.Models;
 
@@ -64,7 +60,8 @@ namespace UndertaleModTool.Windows
                 {
                     Content = "No references found.",
                     FontSize = 16
-                }) { Stretch = Stretch.None };
+                })
+                { Stretch = Stretch.None };
             else
                 ProcessResults(results);
         }
@@ -208,7 +205,7 @@ namespace UndertaleModTool.Windows
                 string invalidCharsRegex = '[' + String.Join("", Path.GetInvalidFileNameChars()) + ']';
                 sourceObjName = Regex.Replace(sourceObjName, invalidCharsRegex, "_");
             }
-                    
+
             string folderPath = Path.GetDirectoryName(mainWindow.FilePath);
             string filePath = Path.Combine(folderPath, sourceObjName is null
                                                        ? "unreferenced_assets.txt" : $"references_of_asset_{sourceObjName}.txt");
@@ -261,7 +258,7 @@ namespace UndertaleModTool.Windows
                 mainWindow.Focus();
 
                 mainWindow.ChangeSelection(obj, inNewTab);
-            } 
+            }
         }
 
         private void MenuItem_ContextMenuOpened(object sender, RoutedEventArgs e)

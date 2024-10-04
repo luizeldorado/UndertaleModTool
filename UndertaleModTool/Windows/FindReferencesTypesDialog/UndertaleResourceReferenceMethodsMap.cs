@@ -3,7 +3,6 @@ using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using UndertaleModLib;
@@ -26,7 +25,7 @@ namespace UndertaleModTool.Windows
                 return base.Contains(item);
 
             return !isYYC || !UndertaleResourceReferenceMap.CodeTypes.Contains(item);
-        } 
+        }
     }
 
     public class PredicateForVersion
@@ -1307,7 +1306,7 @@ namespace UndertaleModTool.Windows
                                                                                      .Select(x => x & 0x0FFFFFFF);
                                             if (allTileIDs.Contains(tileId))
                                                 yield return new object[] { layer, room };
-                                                    
+
                                         }
                                     }
                                 }
@@ -1429,7 +1428,7 @@ namespace UndertaleModTool.Windows
 
                     foreach (var entry in result)
                         outDict.Add(entry.Key, new(entry.Value));
-                }  
+                }
             }
 
             if (outDict.Count == 0)

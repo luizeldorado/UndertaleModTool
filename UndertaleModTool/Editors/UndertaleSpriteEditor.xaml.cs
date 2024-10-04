@@ -1,10 +1,10 @@
-﻿using Microsoft.Win32;
-using System;
+﻿using System;
 using System.IO;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using Microsoft.Win32;
 using UndertaleModLib.Models;
 using UndertaleModLib.Util;
 
@@ -48,8 +48,8 @@ namespace UndertaleModTool
                                 try
                                 {
                                     File.WriteAllBytes(Path.Combine(path, tex.id + ext), tex.tex.TexBlob);
-                                } 
-                                catch (Exception ex) 
+                                }
+                                catch (Exception ex)
                                 {
                                     mainWindow.ShowError("Failed to export file: " + ex.Message, "Failed to export file");
                                 }

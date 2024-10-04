@@ -1,20 +1,16 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
-using System.Windows.Media.Imaging;
-using UndertaleModLib.Models;
-using UndertaleModLib;
-using System.Windows;
 using System.Windows.Media;
-using System.Windows.Threading;
+using System.Windows.Media.Imaging;
+using UndertaleModLib;
+using UndertaleModLib.Models;
 using static UndertaleModLib.Models.UndertaleRoom;
 
 namespace UndertaleModTool
@@ -297,9 +293,9 @@ namespace UndertaleModTool
             switch (editor)
             {
                 case UndertaleCodeEditor codeEditor:
-                    #pragma warning disable CA1416
+#pragma warning disable CA1416
                     bool isDecompiledOpen = codeEditor.CodeModeTabs.SelectedIndex == 0;
-                    
+
                     var textEditor = codeEditor.DecompiledEditor;
                     (int, int, double) decompCodePos;
                     int linePos, columnPos;
@@ -356,7 +352,7 @@ namespace UndertaleModTool
                         DisassemblyScrollPos = codeEditor.DisassemblyEditor.VerticalOffset,
                         IsDecompiledOpen = isDecompiledOpen
                     };
-                    #pragma warning restore CA1416
+#pragma warning restore CA1416
                     break;
 
                 case UndertaleRoomEditor roomEditor:
@@ -398,7 +394,7 @@ namespace UndertaleModTool
                             return;
                         }
                     }
-                    
+
                     ScrollViewer glyphsViewer = MainWindow.FindVisualChild<ScrollViewer>(fontEditor.GlyphsGrid);
                     if (glyphsViewer is null)
                     {
@@ -615,10 +611,10 @@ namespace UndertaleModTool
             {
                 case CodeTabState codeTabState:
                     // Is executed only if it's the same code entry (between new and old tabs)
-                    #pragma warning disable CA1416
+#pragma warning disable CA1416
                     if (!codeTabState.IsStateRestored)
                         (editor as UndertaleCodeEditor).RestoreState(codeTabState);
-                    #pragma warning restore CA1416
+#pragma warning restore CA1416
                     break;
 
                 case RoomTabState roomTabState:
@@ -631,13 +627,13 @@ namespace UndertaleModTool
 
                         roomEditor.RoomGraphics.LayoutTransform = roomTabState.RoomPreviewTransform;
                         roomEditor.RoomGraphics.UpdateLayout();
-                    }  
+                    }
 
                     ScrollViewer roomPreviewViewer = roomEditor.RoomGraphicsScroll;
                     roomPreviewViewer.ScrollToHorizontalOffset(roomTabState.RoomPreviewScrollPosition.Left);
                     roomPreviewViewer.ScrollToVerticalOffset(roomTabState.RoomPreviewScrollPosition.Top);
 
-                    
+
                     // (Sadly, arrays don't support destructuring like tuples)
                     if (roomTabState.ObjectTreeItemsStates is not null)
                     {
@@ -847,7 +843,7 @@ namespace UndertaleModTool
 
                         backgroundEditor.TileIdList.SelectedItem = tileSetTabState.SelectedTile;
                     }
-                    
+
                     break;
 
                 case TextureGroupTabState textureGroupTabState:
@@ -865,7 +861,7 @@ namespace UndertaleModTool
                     for (int i = 0; i < lists.Length; i++)
                     {
                         var list = lists[i];
-                        var (isExpanded, scrollPos, selectedItem) = textureGroupTabState.GroupListsStates[i]; 
+                        var (isExpanded, scrollPos, selectedItem) = textureGroupTabState.GroupListsStates[i];
 
                         list.Item1.IsExpanded = isExpanded;
                         list.Item1.UpdateLayout();
@@ -908,7 +904,7 @@ namespace UndertaleModTool
         {
             if (LastContentState is CodeTabState codeTabState)
             {
-                #pragma warning disable CA1416
+#pragma warning disable CA1416
                 if (codeTabState.IsDecompiledOpen)
                     UndertaleCodeEditor.EditorTab = UndertaleCodeEditor.CodeEditorTab.Decompiled;
                 else
@@ -918,7 +914,7 @@ namespace UndertaleModTool
                 UndertaleCodeEditor.OverriddenDisasmPos = codeTabState.DisassemblyCodePosition;
 
                 codeTabState.IsStateRestored = true;
-                #pragma warning restore CA1416
+#pragma warning restore CA1416
             }
         }
 

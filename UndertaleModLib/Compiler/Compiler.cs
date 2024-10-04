@@ -21,7 +21,7 @@ namespace UndertaleModLib.Compiler
         public bool TypedAssetRefs => Data.IsVersionAtLeast(2023, 8);
         public int LastCompiledArgumentCount = 0;
         public Dictionary<string, string> LocalVars = new Dictionary<string, string>();
-        public Dictionary<string, string> GlobalVars = new Dictionary<string, string>(); 
+        public Dictionary<string, string> GlobalVars = new Dictionary<string, string>();
         public Stack<Compiler.Parser.FunctionParseInfo> FunctionParseStack = new();
         public Dictionary<Compiler.Parser.Statement, Compiler.Parser.FunctionParseInfo> FunctionParseInfo = new();
         public List<(string, Compiler.Parser.Statement)> EnumStatements = new List<(string, Compiler.Parser.Statement)>();
@@ -140,7 +140,7 @@ namespace UndertaleModLib.Compiler
             assetIds.Clear();
             scripts.Clear();
             if (Data is null) return;
-            
+
             int maxSize = 0;
             maxSize += Data.GameObjects?.Count ?? 0;
             maxSize += Data.Sprites?.Count ?? 0;
@@ -156,7 +156,7 @@ namespace UndertaleModLib.Compiler
             maxSize += Data.AnimationCurves?.Count ?? 0;
             maxSize += Data.Sequences?.Count ?? 0;
             maxSize += Data.ParticleSystems?.Count ?? 0;
-            
+
             assetIds.EnsureCapacity(maxSize);
             scripts.EnsureCapacity(Data.Scripts?.Count ?? 0);
 

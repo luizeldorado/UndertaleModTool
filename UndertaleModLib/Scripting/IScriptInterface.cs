@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 using Underanalyzer.Decompiler;
 using UndertaleModLib.Decompiler;
@@ -479,7 +478,7 @@ public interface IScriptInterface
     /// Obsolete.
     /// </summary>
     [Obsolete("Use StopProgressBarUpdater instead!")]
-    sealed Task StopUpdater ()
+    sealed Task StopUpdater()
     {
         return StopProgressBarUpdater();
     }
@@ -590,7 +589,7 @@ public interface IScriptInterface
     /// <param name="isRegex">Whether <paramref name="keyword"/> should be treated as RegEx.</param>
     /// <param name="context">The GlobalDecompileContext to use for decompilation.</param>
     /// <param name="settings">The settings to use for decompilation, or <see langword="null"/> to use the default.</param>
-    void ReplaceTextInGML(string codeName, string keyword, string replacement, bool caseSensitive = false, bool isRegex = false, 
+    void ReplaceTextInGML(string codeName, string keyword, string replacement, bool caseSensitive = false, bool isRegex = false,
                           GlobalDecompileContext context = null, IDecompileSettings settings = null);
 
     /// <summary>
@@ -603,7 +602,7 @@ public interface IScriptInterface
     /// <param name="isRegex">Whether <paramref name="keyword"/> should be treated as RegEx.</param>
     /// <param name="context">The GlobalDecompileContext to use for decompilation.</param>
     /// <param name="settings">The settings to use for decompilation, or <see langword="null"/> to use the default.</param>
-    void ReplaceTextInGML(UndertaleCode code, string keyword, string replacement, bool caseSensitive = false, bool isRegex = false, 
+    void ReplaceTextInGML(UndertaleCode code, string keyword, string replacement, bool caseSensitive = false, bool isRegex = false,
                           GlobalDecompileContext context = null, IDecompileSettings settings = null);
 
     /// <summary>

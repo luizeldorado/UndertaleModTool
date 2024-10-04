@@ -1,20 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
 using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 using UndertaleModLib.Models;
 
 namespace UndertaleModTool
@@ -125,8 +116,8 @@ namespace UndertaleModTool
 
             Point boundingLow = new Point(Double.PositiveInfinity, Double.PositiveInfinity);
             Point boundingHigh = new Point(Double.NegativeInfinity, Double.NegativeInfinity);
-            
-            foreach(var point in path.Points)
+
+            foreach (var point in path.Points)
             {
                 if (point.X < boundingLow.X)
                     boundingLow.X = point.X;
@@ -140,7 +131,7 @@ namespace UndertaleModTool
 
             PathFigure target = new PathFigure();
             target.StartPoint = new Point(path.Points[0].X, path.Points[0].Y);
-            target.Segments = new PathSegmentCollection(); 
+            target.Segments = new PathSegmentCollection();
             for (int i = 1; i < path.Points.Count; i++)
             {
                 LineSegment segment = new LineSegment();

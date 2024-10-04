@@ -13,7 +13,7 @@ namespace UndertaleModLib.ModelsDebug
         public void Serialize(UndertaleWriter writer)
         {
             writer.Write((uint)Count * 2);
-            foreach(DebugInfoPair pair in this)
+            foreach (DebugInfoPair pair in this)
             {
                 writer.Write(pair.BytecodeOffset);
                 writer.Write(pair.SourceCodeOffset);

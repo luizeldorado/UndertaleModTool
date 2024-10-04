@@ -17,7 +17,7 @@ namespace UndertaleModTool
             Loaded += DataGrid_Loaded;
             AddingNewItem += DataGrid_AddingNewItem;
         }
-        
+
         private void DataGrid_AddingNewItem(object sender, AddingNewItemEventArgs e)
         {
             _ = Task.Run(() =>

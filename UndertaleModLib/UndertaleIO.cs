@@ -3,10 +3,8 @@ using System.Buffers;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.IO.Ports;
 using System.Linq;
 using System.Reflection;
-using System.Text;
 using System.Threading.Tasks;
 using UndertaleModLib.Compiler;
 using UndertaleModLib.Models;
@@ -543,7 +541,7 @@ namespace UndertaleModLib
 
             return GetChildObjectCount(t);
         }
-        
+
 
         public T GetUndertaleObjectAtAddress<T>(uint address) where T : UndertaleObject, new()
         {
@@ -793,7 +791,7 @@ namespace UndertaleModLib
                 }
                 else
                     objectPool.Add(obj, objectAddr); // strings come later in the file, so no need to add them to the pool
-                
+
                 obj.Serialize(this);
 
                 if (pendingWrites.ContainsKey(obj))

@@ -1,17 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
 using NAudio.Vorbis;
 using NAudio.Wave;
 using UndertaleModLib;
@@ -96,7 +85,8 @@ namespace UndertaleModTool
                     }
                     else
                         throw new Exception("Failed to find audio file.");
-                } catch (Exception ex)
+                }
+                catch (Exception ex)
                 {
                     waveOut = null;
                     mainWindow.ShowError("Failed to play audio!\r\n" + ex.Message, "Audio failure");
@@ -129,13 +119,15 @@ namespace UndertaleModTool
                     }
                     else
                         throw new Exception("Failed to find audio group file.");
-                } catch (Exception ex)
+                }
+                catch (Exception ex)
                 {
                     waveOut = null;
                     mainWindow.ShowError("Failed to play audio!\r\n" + ex.Message, "Audio failure");
                     return;
                 }
-            } else
+            }
+            else
                 target = sound.AudioFile;
 
             if (target != null)

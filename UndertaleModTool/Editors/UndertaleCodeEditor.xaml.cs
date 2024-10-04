@@ -1,17 +1,7 @@
-﻿using ICSharpCode.AvalonEdit;
-using ICSharpCode.AvalonEdit.Document;
-using ICSharpCode.AvalonEdit.Editing;
-using ICSharpCode.AvalonEdit.Folding;
-using ICSharpCode.AvalonEdit.Highlighting;
-using ICSharpCode.AvalonEdit.Highlighting.Xshd;
-using ICSharpCode.AvalonEdit.Rendering;
-using ICSharpCode.AvalonEdit.Search;
-using Newtonsoft.Json;
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -22,14 +12,17 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
 using System.Windows.Media.TextFormatting;
-using System.Windows.Navigation;
 using System.Xml;
+using ICSharpCode.AvalonEdit;
+using ICSharpCode.AvalonEdit.Editing;
+using ICSharpCode.AvalonEdit.Highlighting;
+using ICSharpCode.AvalonEdit.Highlighting.Xshd;
+using ICSharpCode.AvalonEdit.Rendering;
+using ICSharpCode.AvalonEdit.Search;
+using Newtonsoft.Json;
 using UndertaleModLib;
 using UndertaleModLib.Compiler;
 using UndertaleModLib.Decompiler;
@@ -1106,7 +1099,7 @@ namespace UndertaleModTool
                 {
                     int line = docLine.LineNumber;
                     var highlighter = highlighterInst;
-                    
+
                     HighlightedLine highlighted;
                     try
                     {
@@ -1152,10 +1145,10 @@ namespace UndertaleModTool
                     return null;
 
                 var doc = CurrentContext.Document;
-                string numText = doc.GetText(offset, numLength); 
+                string numText = doc.GetText(offset, numLength);
 
                 var line = new ClickVisualLineText(numText, CurrentContext.VisualLine, numLength);
-                
+
                 line.Clicked += (text, inNewTab) =>
                 {
                     if (int.TryParse(text, out int id))
@@ -1209,7 +1202,7 @@ namespace UndertaleModTool
                                 {
                                     mainWindow.Focus();
                                     mainWindow.ChangeSelection(obj, true);
-                                    
+
                                 }
                                 else if ((Keyboard.Modifiers & ModifierKeys.Shift) == ModifierKeys.Shift)
                                     mainWindow.ChangeSelection(obj);
@@ -1410,7 +1403,7 @@ namespace UndertaleModTool
                 {
                     NamedObjDict.TryGetValue(nameText, out val);
                     if (data.IsVersionAtLeast(2, 3))
-                    { 
+                    {
                         if (val is UndertaleScript)
                             val = null; // in GMS2.3 scripts are never referenced directly
 

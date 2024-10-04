@@ -32,7 +32,7 @@ public class UndertaleFunction : UndertaleNamedResource, UndertaleInstruction.Re
     /// How often this <see cref="UndertaleFunction"/> is referenced in code.
     /// </summary>
     public uint Occurrences { get; set; }
-    
+
     /// <summary>
     /// The first instruction in this function.
     /// </summary>
@@ -112,7 +112,7 @@ public class UndertaleCodeLocals : UndertaleNamedResource, IDisposable
     /// The name of the code local entry which corresponds to a code entry.
     /// </summary>
     public UndertaleString Name { get; set; }
-    
+
     /// <summary>
     /// A collection of local variables.
     /// </summary>
@@ -158,7 +158,7 @@ public class UndertaleCodeLocals : UndertaleNamedResource, IDisposable
     /// <returns><see langword="true"/> if a variable matching the provided name exists, otherwise <see langword="false"/>.</returns>
     public bool HasLocal(string varName)
     {
-        return Locals.Any(local=>local.Name.Content == varName);
+        return Locals.Any(local => local.Name.Content == varName);
     }
 
     // TODO: INotifyPropertyChanged
@@ -174,7 +174,7 @@ public class UndertaleCodeLocals : UndertaleNamedResource, IDisposable
         /// TODO: have no idea what this index does.
         /// </summary>
         public uint Index { get; set; }
-        
+
         /// <summary>
         /// The name of the local variable.
         /// </summary>

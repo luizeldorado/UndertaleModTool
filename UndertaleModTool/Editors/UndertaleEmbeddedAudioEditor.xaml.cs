@@ -1,21 +1,9 @@
-﻿using Microsoft.Win32;
+﻿using System;
+using System.IO;
+using System.Windows;
+using Microsoft.Win32;
 using NAudio.Vorbis;
 using NAudio.Wave;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 using UndertaleModLib.Models;
 
 namespace UndertaleModTool
@@ -120,9 +108,11 @@ namespace UndertaleModTool
                         InitAudio();
                         waveOut.Init(oggReader);
                         waveOut.Play();
-                    } else
+                    }
+                    else
                         mainWindow.ShowError("Failed to play audio!\r\nNot a WAV or OGG.", "Audio failure");
-                } catch (Exception ex)
+                }
+                catch (Exception ex)
                 {
                     waveOut = null;
                     mainWindow.ShowError("Failed to play audio!\r\n" + ex.Message, "Audio failure");

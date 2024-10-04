@@ -169,7 +169,7 @@ public class UndertaleTextureGroupInfo : UndertaleNamedResource, IDisposable
         // Read the objects, throwing an error if the pointers are invalid
         reader.ReadUndertaleObject(TexturePages);
         reader.ReadUndertaleObject(Sprites);
-        if (!reader.undertaleData.IsNonLTSVersionAtLeast(2023, 1)) 
+        if (!reader.undertaleData.IsNonLTSVersionAtLeast(2023, 1))
             reader.ReadUndertaleObject(SpineSprites);
         reader.ReadUndertaleObject(Fonts);
         reader.ReadUndertaleObject(Tilesets);
