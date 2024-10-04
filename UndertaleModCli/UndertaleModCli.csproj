@@ -1,35 +1,31 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup>
+        <TargetFramework>net8.0</TargetFramework>
+        <OutputType>Exe</OutputType>
+        <Platforms>AnyCPU;x64</Platforms>
 
-  <PropertyGroup>
-    <OutputType>Exe</OutputType>
-    <TargetFramework>net8.0</TargetFramework>
-    <Platforms>AnyCPU;x64</Platforms>
-    <Nullable>disable</Nullable>
-    <RollForward>LatestMajor</RollForward>
-    <GenerateDocumentationFile>True</GenerateDocumentationFile>
-    <NeutralLanguage>en</NeutralLanguage>
-    <ResourceLanguages>en</ResourceLanguages>
-    <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
-    <!-- Suppress all missing XML comment warnings -->
-    <NoWarn>1591</NoWarn>
-  </PropertyGroup>
+        <RollForward>LatestMajor</RollForward>
 
-  <ItemGroup>
-    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Scripting" Version="4.11.0" />
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
-    <PackageReference Include="runtime.osx.10.10-x64.CoreCompat.System.Drawing" Version="6.0.5.128" />
-    <PackageReference Include="System.CommandLine" Version="2.0.0-beta1.21308.1" />
-  </ItemGroup>
+        <Version>0.6.1.0</Version>
+        <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
+        <Copyright>Copyright ©  2018-2024, licensed under GPLv3</Copyright>
 
-  <ItemGroup>
-    <ProjectReference Include="..\Underanalyzer\Underanalyzer\Underanalyzer.csproj" />
-    <ProjectReference Include="..\UndertaleModLib\UndertaleModLib.csproj" />
-  </ItemGroup>
+        <GenerateDocumentationFile>True</GenerateDocumentationFile>
 
-  <ItemGroup>
-    <None Update="runtimeconfig.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-  </ItemGroup>
+        <NeutralLanguage>en</NeutralLanguage>
+        <ResourceLanguages>en</ResourceLanguages>
+        <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
 
+        <!-- Suppress all missing XML comment warnings -->
+        <NoWarn>1591</NoWarn>
+    </PropertyGroup>
+    <ItemGroup>
+        <ProjectReference Include="..\Underanalyzer\Underanalyzer\Underanalyzer.csproj" />
+        <ProjectReference Include="..\UndertaleModLib\UndertaleModLib.csproj" />
+    </ItemGroup>
+    <ItemGroup>
+        <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Scripting" Version="4.11.0" />
+        <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+        <PackageReference Include="System.CommandLine" Version="2.0.0-beta1.21308.1" />
+    </ItemGroup>
 </Project>
