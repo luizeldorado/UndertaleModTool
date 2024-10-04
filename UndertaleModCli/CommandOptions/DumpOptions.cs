@@ -16,7 +16,7 @@ public class DumpOptions
 	/// <summary>
 	/// Directory path to where to dump all contents
 	/// </summary>
-	public DirectoryInfo? Output { get; set; }
+	public DirectoryInfo Output { get; set; }
 
 	/// <summary>
 	/// Determines if Cli should print out verbose logs

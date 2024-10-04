@@ -184,7 +184,7 @@ namespace UndertaleModTool.Windows
                 
             }
             // TODO: Look at specific exceptions
-            catch (Exception e)
+            catch (Exception)
             {
                 failedList.Add(code.Name.Content);
             }

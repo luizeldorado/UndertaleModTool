@@ -316,7 +316,7 @@ public interface IScriptInterface
     Task ClickableSearchOutput(string title, string query, int resultsCount, IDictionary<string, List<(int lineNum, string codeLine)>> resultsDict, bool showInDecompiledView, IEnumerable<string> failedList = null);
 
     /// <summary>
-    /// Sets <see cref="isFinishedMessageEnabled"/>.
+    /// Sets if actions should show a "this is finished" text.
     /// </summary>
     /// <param name="isFinishedMessageEnabled">The state to set it to.</param>
     void SetFinishedMessage(bool isFinishedMessageEnabled);

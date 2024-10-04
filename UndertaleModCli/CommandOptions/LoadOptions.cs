@@ -18,15 +18,15 @@ public class LoadOptions
 	/// </summary>
 	public FileInfo[] Scripts { get; set; }
 
-	/// <summary>
-	/// C# string that shall be executed
-	/// </summary>
-	public string? Line { get; set; }
+    /// <summary>
+    /// C# string that shall be executed
+    /// </summary>
+    public string Line { get; set; }
 
 	/// <summary>
 	/// File path to where to save the modified data file
 	/// </summary>
-	public FileInfo? Output { get; set; }
+	public FileInfo Output { get; set; }
 
 	/// <summary>
 	/// Determines if Cli should be run in interactive mode
