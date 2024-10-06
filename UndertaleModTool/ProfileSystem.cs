@@ -117,7 +117,6 @@ namespace UndertaleModTool
                                 if (Directory.Exists(recoveredDir))
                                     Directory.Delete(recoveredDir, true);
                                 Directory.Move(pathOfRecoverableCode, recoveredDir);
-                                ApplyCorrections();
                             }
                             else
                             {
@@ -134,18 +133,6 @@ namespace UndertaleModTool
             catch (Exception exc)
             {
                 this.ShowError("CrashCheck error! Send this to Grossley#2869 and make an issue on Github\n" + exc);
-            }
-        }
-
-        public void ApplyCorrections()
-        {
-            try
-            {
-                DirectoryCopy(CorrectionsFolder, ProfilesFolder, true);
-            }
-            catch (Exception exc)
-            {
-                this.ShowError("ApplyCorrections error! Send this to Grossley#2869 and make an issue on Github\n" + exc);
             }
         }
 
