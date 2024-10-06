@@ -1,5 +1,7 @@
 // Imports and unlocks border images into PC version of the game
 
+using UndertaleModLib.Util;
+
 EnsureDataLoaded();
 
 if (Data?.GeneralInfo?.DisplayName?.Content.ToLower() == "deltarune chapter 1 & 2")
@@ -69,8 +71,8 @@ int lastTextPageItem = Data.TexturePageItems.Count - 1;
 foreach (var path in Directory.EnumerateFiles(bordersPath))
 {
     UndertaleEmbeddedTexture newtex = new UndertaleEmbeddedTexture();
-    newtex.Name = new UndertaleString("Texture " + ++lastTextPage);
-    newtex.TextureData.TextureBlob = File.ReadAllBytes(path);
+    newtex.Name = new UndertaleString($"Texture {++lastTextPage}");
+    newtex.TextureData.Image = GMImage.FromPng(File.ReadAllBytes(path)); // Possibly other formats than PNG in the future, but no Undertale versions currently have them
     Data.EmbeddedTextures.Add(newtex);
     textures.Add(Path.GetFileName(path), newtex);
 }
@@ -79,13 +81,13 @@ foreach (var path in Directory.EnumerateFiles(bordersPath))
 Action<string, UndertaleEmbeddedTexture, ushort, ushort, ushort, ushort> AssignBorderBackground = (name, tex, x, y, width, height) => 
 {
     var bg = Data.Backgrounds.ByName(name);
-    if (bg == null) 
+    if (bg is null) 
     {
         // The anime border does not exist on PC yet ;)
         return;
     }
     UndertaleTexturePageItem tpag = new UndertaleTexturePageItem();
-    tpag.Name = new UndertaleString("PageItem " + (++lastTextPageItem));
+    tpag.Name = new UndertaleString($"PageItem {++lastTextPageItem}");
     tpag.SourceX = x; tpag.SourceY = y; tpag.SourceWidth = width; tpag.SourceHeight = height;
     tpag.TargetX = 0; tpag.TargetY = 0; tpag.TargetWidth = width; tpag.TargetHeight = height;
     tpag.BoundingWidth = width; tpag.BoundingHeight = height;
