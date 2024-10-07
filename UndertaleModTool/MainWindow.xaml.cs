@@ -112,7 +112,7 @@ namespace UndertaleModTool
         public bool ScriptExecutionSuccess { get; set; } = true;
         public bool IsSaving { get; set; }
         public string ScriptErrorMessage { get; set; } = "";
-        public string ExePath { get; private set; } = Program.GetExecutableDirectory();
+        public string ExePath { get; private set; } = Path.GetDirectoryName(Environment.ProcessPath);
         public string ScriptErrorType { get; set; } = "";
 
         public enum SaveResult
@@ -2249,7 +2249,7 @@ namespace UndertaleModTool
         {
             string path = (string)(sender as MenuItem).CommandParameter;
             if (!File.Exists(path))
-                path = Path.Combine(Program.GetExecutableDirectory(), path);
+                path = Path.Combine(ExePath, path);
 
             if (File.Exists(path))
                 await RunScript(path);

@@ -5,8 +5,6 @@
         <Platforms>AnyCPU;x64</Platforms>
         <RuntimeIdentifiers>win-x64</RuntimeIdentifiers>
 
-        <StartupObject>UndertaleModTool.Program</StartupObject>
-
         <UseWpf>true</UseWpf>
         <RollForward>LatestMajor</RollForward>
         <IncludeAllContentForSelfExtract>true</IncludeAllContentForSelfExtract>
