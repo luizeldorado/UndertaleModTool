@@ -2,14 +2,11 @@
     <PropertyGroup>
         <TargetFramework>net8.0</TargetFramework>
         <OutputType>Library</OutputType>
-        <Platforms>AnyCPU;x64</Platforms>
-        <RuntimeIdentifiers>win-x64</RuntimeIdentifiers>
 
         <Version>0.6.1.0</Version>
         <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
         <Copyright>Copyright ©  2018-2024, licensed under GPLv3</Copyright>
 
-        <DebugType>embedded</DebugType>
         <GenerateDocumentationFile>True</GenerateDocumentationFile>
 
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>

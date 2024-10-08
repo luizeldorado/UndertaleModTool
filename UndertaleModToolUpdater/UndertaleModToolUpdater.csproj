@@ -2,7 +2,6 @@
     <PropertyGroup>
         <TargetFramework>net8.0-windows</TargetFramework>
         <OutputType>Exe</OutputType>
-        <RuntimeIdentifiers>win-x64</RuntimeIdentifiers>
 
         <IncludeAllContentForSelfExtract>true</IncludeAllContentForSelfExtract>
 
