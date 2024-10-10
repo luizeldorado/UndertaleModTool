@@ -61,21 +61,6 @@ namespace UndertaleModLib.Tests
             await Task.Delay(1); //dummy await
             return true;
         }
-        public void ReplaceTempWithMain(bool imAnExpertBtw = false)
-        {
-        }
-        public void ReplaceMainWithTemp(bool imAnExpertBtw = false)
-        {
-        }
-        public void ReplaceTempWithCorrections(bool imAnExpertBtw = false)
-        {
-        }
-        public void ReplaceCorrectionsWithTemp(bool imAnExpertBtw = false)
-        {
-        }
-        public void UpdateCorrections(bool imAnExpertBtw = false)
-        {
-        }
         public void ReapplyProfileCode()
         {
         }
@@ -305,18 +290,6 @@ namespace UndertaleModLib.Tests
         public string PromptLoadFile(string defaultExt, string filter)
         {
             throw new NotImplementedException();
-        }
-        public bool DummyBool()
-        {
-            return true;
-        }
-
-        public void DummyVoid()
-        {
-        }
-        public string DummyString()
-        {
-            return "";
         }
     }
 

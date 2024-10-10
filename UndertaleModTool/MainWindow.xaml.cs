@@ -112,7 +112,7 @@ namespace UndertaleModTool
         public bool ScriptExecutionSuccess { get; set; } = true;
         public bool IsSaving { get; set; }
         public string ScriptErrorMessage { get; set; } = "";
-        public string ExePath { get; private set; } = Program.GetExecutableDirectory();
+        public string ExePath { get; private set; } = Path.GetDirectoryName(Environment.ProcessPath);
         public string ScriptErrorType { get; set; } = "";
 
         public enum SaveResult
@@ -189,7 +189,6 @@ namespace UndertaleModTool
         public byte[] MD5CurrentlyLoaded = new byte[15];
         public static string AppDataFolder => Settings.AppDataFolder;
         public static string ProfilesFolder = Path.Combine(Settings.AppDataFolder, "Profiles");
-        public static string CorrectionsFolder = Path.Combine(Program.GetExecutableDirectory(), "Corrections");
         public string ProfileHash = "Unknown";
         public bool CrashedWhileEditing = false;
 
@@ -497,8 +496,6 @@ namespace UndertaleModTool
                 }
             }
 
-            // Copy the known code corrections into the profile, if they don't already exist.
-            ApplyCorrections();
             CrashCheck();
 
             RunGMSDebuggerItem.Visibility = Settings.Instance.ShowDebuggerOption
@@ -2252,7 +2249,7 @@ namespace UndertaleModTool
         {
             string path = (string)(sender as MenuItem).CommandParameter;
             if (!File.Exists(path))
-                path = Path.Combine(Program.GetExecutableDirectory(), path);
+                path = Path.Combine(ExePath, path);
 
             if (File.Exists(path))
                 await RunScript(path);

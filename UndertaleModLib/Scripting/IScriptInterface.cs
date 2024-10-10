@@ -116,20 +116,6 @@ public interface IScriptInterface
     /// <returns><see langword="true"/> if task was successful, <see langword="false"/> if not.</returns>
     Task<bool> MakeNewDataFile();
 
-    /// <summary> Obsolete. Use <see cref="MakeNewDataFile"/>. </summary>
-    [Obsolete("Use MakeNewDataFile instead!")]
-    sealed Task<bool> Make_New_File()
-    {
-        return MakeNewDataFile();
-    }
-
-    //TODO: i have absolutely no idea what any of these do.
-    void ReplaceTempWithMain(bool imAnExpertBtw = false);
-    void ReplaceMainWithTemp(bool imAnExpertBtw = false);
-    void ReplaceTempWithCorrections(bool imAnExpertBtw = false);
-    void ReplaceCorrectionsWithTemp(bool imAnExpertBtw = false);
-    void UpdateCorrections(bool imAnExpertBtw = false);
-
     /// <summary>
     /// Used in Scripts in order to show a message to the user.
     /// </summary>
@@ -369,15 +355,6 @@ public interface IScriptInterface
     void IncrementProgress();
 
     /// <summary>
-    /// Obsolete.
-    /// </summary>
-    [Obsolete("Use IncrementProgress instead!")]
-    sealed void IncProgress()
-    {
-        IncrementProgress();
-    }
-
-    /// <summary>
     /// Adds a certain amount to the variable holding a progress value in.
     /// Used for parallel operations, as it is thread-safe.
     /// </summary>
@@ -385,28 +362,10 @@ public interface IScriptInterface
     void AddProgressParallel(int amount);
 
     /// <summary>
-    /// Obsolete.
-    /// </summary>
-    [Obsolete("Use AddProgressParallel instead!")]
-    sealed void AddProgressP(int amount)
-    {
-        AddProgressParallel(amount);
-    }
-
-    /// <summary>
     /// Increments the variable holding a progress value by one.
     /// Used for parallel operations, as it is thread-safe.
     /// </summary>
     void IncrementProgressParallel();
-
-    /// <summary>
-    /// Obsolete.
-    /// </summary>
-    [Obsolete("Use IncrementProgressParallel instead!")]
-    sealed void IncProgressP()
-    {
-        IncrementProgressParallel();
-    }
 
     /// <summary>
     /// Gets the value of the variable holding a progress value.
@@ -445,43 +404,15 @@ public interface IScriptInterface
     void DisableAllSyncBindings();
 
     /// <summary>
-    /// Obsolete
-    /// </summary>
-    /// <param name="enable"></param>
-    [Obsolete("Use DisableAllSyncBindings() instead!")]
-    sealed void SyncBinding(bool enable = false)
-    {
-        DisableAllSyncBindings();
-    }
-
-    /// <summary>
     /// Starts the task that updates a progress bar in parallel.
     /// </summary>
     void StartProgressBarUpdater();
-
-    /// <summary>
-    /// Obsolete.
-    /// </summary>
-    [Obsolete("Use StartProgressBarUpdater instead!")]
-    sealed void StartUpdater()
-    {
-        StartProgressBarUpdater();
-    }
 
     /// <summary>
     /// Stops the task that updates a progress bar in parallel.
     /// </summary>
     /// <returns>A task that represents the stopped progress updater.</returns>
     Task StopProgressBarUpdater();
-
-    /// <summary>
-    /// Obsolete.
-    /// </summary>
-    [Obsolete("Use StopProgressBarUpdater instead!")]
-    sealed Task StopUpdater()
-    {
-        return StopProgressBarUpdater();
-    }
 
     /// <summary>
     /// Generates a decompiled code cache to accelerate operations that need to access code often.
@@ -505,15 +436,6 @@ public interface IScriptInterface
     /// </summary>
     /// <returns>The directory selected by the user.</returns>
     string PromptChooseDirectory();
-
-    /// <summary>
-    /// Obsolete
-    /// </summary>
-    [Obsolete("Use this parameters, as it is not used.")]
-    sealed string PromptChooseDirectory(string prompt)
-    {
-        return PromptChooseDirectory();
-    }
 
     /// <summary>
     /// Used to prompt the user for a file.
@@ -604,30 +526,4 @@ public interface IScriptInterface
     /// <param name="settings">The settings to use for decompilation, or <see langword="null"/> to use the default.</param>
     void ReplaceTextInGML(UndertaleCode code, string keyword, string replacement, bool caseSensitive = false, bool isRegex = false,
                           GlobalDecompileContext context = null, IDecompileSettings settings = null);
-
-    /// <summary>
-    /// Method returning a dummy boolean value.
-    /// </summary>
-    /// <returns>Returns a dummy boolean value</returns>
-    bool DummyBool()
-    {
-        return true;
-    }
-
-    /// <summary>
-    /// Method doing nothing.
-    /// </summary>
-    void DummyVoid()
-    {
-
-    }
-
-    /// <summary>
-    /// Method returning a dummy string value.
-    /// </summary>
-    /// <returns>Returns a dummy string value.</returns>
-    string DummyString()
-    {
-        return "";
-    }
 }

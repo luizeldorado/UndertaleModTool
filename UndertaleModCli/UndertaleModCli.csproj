@@ -2,9 +2,9 @@
     <PropertyGroup>
         <TargetFramework>net8.0</TargetFramework>
         <OutputType>Exe</OutputType>
-        <Platforms>AnyCPU;x64</Platforms>
 
         <RollForward>LatestMajor</RollForward>
+        <IncludeAllContentForSelfExtract>true</IncludeAllContentForSelfExtract>
 
         <Version>0.6.1.0</Version>
         <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>

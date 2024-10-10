@@ -681,60 +681,7 @@ public partial class Program : IScriptInterface
             throw new Exception("This UndertaleData is set to use profile mode, but UndertaleModCLI does not support profile mode.");
         }
     }
-
-    #region Some dangerous functions I don't know what they do
-
-    //TODO: ask what these do and implement them.
-    /// <inheritdoc/>
-    public void ReplaceTempWithMain(bool imAnExpertBtw = false)
-    {
-        throw new NotImplementedException("Sorry, this hasn't been implemented yet!");
-    }
-
-    /// <inheritdoc/>
-    public void ReplaceMainWithTemp(bool imAnExpertBtw = false)
-    {
-        throw new NotImplementedException("Sorry, this hasn't been implemented yet!");
-    }
-
-    /// <inheritdoc/>
-    public void ReplaceTempWithCorrections(bool imAnExpertBtw = false)
-    {
-        throw new NotImplementedException("Sorry, this hasn't been implemented yet!");
-    }
-
-    /// <inheritdoc/>
-    public void ReplaceCorrectionsWithTemp(bool imAnExpertBtw = false)
-    {
-        throw new NotImplementedException("Sorry, this hasn't been implemented yet!");
-    }
-
-    /// <inheritdoc/>
-    public void UpdateCorrections(bool imAnExpertBtw = false)
-    {
-        throw new NotImplementedException("Sorry, this hasn't been implemented yet!");
-    }
     #endregion
-
-    #endregion
-
-    /// <inheritdoc/>
-    public bool DummyBool()
-    {
-        return false;
-    }
-
-    /// <inheritdoc/>
-    public void DummyVoid()
-    {
-        // i want hugs so bad :(
-    }
-
-    /// <inheritdoc/>
-    public string DummyString()
-    {
-        return "";
-    }
 
     // Copy-pasted from GUI. TODO: Should probably get shared at one point, but there are some GUI only attributes accessed there and I don't want to touch the methods.
     #region Helper functions for Code replacing

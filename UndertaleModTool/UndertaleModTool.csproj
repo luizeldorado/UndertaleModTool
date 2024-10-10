@@ -2,10 +2,6 @@
     <PropertyGroup>
         <TargetFramework>net8.0-windows</TargetFramework>
         <OutputType>WinExe</OutputType>
-        <Platforms>AnyCPU;x64</Platforms>
-        <RuntimeIdentifiers>win-x64</RuntimeIdentifiers>
-
-        <StartupObject>UndertaleModTool.Program</StartupObject>
 
         <UseWpf>true</UseWpf>
         <RollForward>LatestMajor</RollForward>
@@ -17,7 +13,6 @@
         <ApplicationIcon>icon.ico</ApplicationIcon>
         <ApplicationManifest>app.manifest</ApplicationManifest>
 
-        <DebugType>embedded</DebugType>
         <GenerateDocumentationFile>True</GenerateDocumentationFile>
 
         <NeutralLanguage>en</NeutralLanguage>
@@ -63,10 +58,6 @@
         <Resource Include="Resources/X.png" />
         <Resource Include="Resources/X_Down.png" />
         <Content Include="Scripts/**">
-            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-            <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-        </Content>
-        <Content Include="Corrections/**">
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
             <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
         </Content>

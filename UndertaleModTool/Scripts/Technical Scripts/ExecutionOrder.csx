@@ -17,8 +17,8 @@ ScriptMessage("This script is profile mode compatible. It may take a few minutes
 bool profileChoice = ScriptQuestion(@"Would you like to run this under GML editing mode?
 The alternative is ASM mode.
 
-Warning: All comments, decompilation corrections, and other relevant changes will be deleted from your profile in ASM mode.
-ASM mode is recommended ONLY for games without code corrections or GMS 2.3 games.");
+Warning: All comments and other relevant changes will be deleted from your profile in ASM mode.
+ASM mode is recommended ONLY for GMS 2.3 games.");
 
 // Helper function for defining functions
 UndertaleFunction DefineFunc(string name)
@@ -274,7 +274,7 @@ void ProfileModeOperations()
     // Call scr_eventend immediately before a "return" or "exit" in order to make sure it is always called at end.
     // This avoids the hacky ASM solution of forcing the code to jump to the end of the file.
     // It also makes sense from a GML standpoint.
-    // This will only work for games with corrections, and UT/DR, for which GML can be guaranteed safe.
+    // This will only work for UT/DR, for which GML can be guaranteed safe.
     // Otherwise, the original (hacky) solution will need to be done.
     // But this GML solution is so simple, inserting the call to scr_eventend similarly seems more than possible.
     // Sadly, I don't know how to do such an equivalent action myself.
