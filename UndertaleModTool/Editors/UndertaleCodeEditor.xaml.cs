@@ -7,6 +7,7 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.Versioning;
 using System.Text;
+using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows;
@@ -22,7 +23,6 @@ using ICSharpCode.AvalonEdit.Highlighting;
 using ICSharpCode.AvalonEdit.Highlighting.Xshd;
 using ICSharpCode.AvalonEdit.Rendering;
 using ICSharpCode.AvalonEdit.Search;
-using Newtonsoft.Json;
 using UndertaleModLib;
 using UndertaleModLib.Compiler;
 using UndertaleModLib.Decompiler;
@@ -611,7 +611,7 @@ namespace UndertaleModTool
         {
             try
             {
-                gettextJSON = JsonConvert.DeserializeObject<Dictionary<string, string>>(json);
+                gettextJSON = JsonSerializer.Deserialize<Dictionary<string, string>>(json);
             }
             catch (Exception e)
             {
