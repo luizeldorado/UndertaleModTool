@@ -1,15 +1,14 @@
 // ImportGMS2FontData by Dobby233Liu
 
-using System;
-using System.IO;
-using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
-using System.Text;
+using System.Text.Json;
+using System.Text.Json.Nodes;
 using UndertaleModLib;
+using UndertaleModLib.Models;
+using UndertaleModLib.Scripting;
 using UndertaleModLib.Util;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 
 EnsureDataLoaded();
 
@@ -26,13 +25,11 @@ if (importFile == null)
     return;
 }
 
-JObject fontData = null;
-using (StreamReader file = File.OpenText(importFile))
+
+JsonObject fontData = null;
+using (FileStream file = File.OpenRead(importFile))
 {
-    using (JsonTextReader reader = new JsonTextReader(file))
-    {
-        fontData = JObject.Load(reader);
-    }
+    fontData = JsonObject.Parse(file, documentOptions: new JsonDocumentOptions { AllowTrailingCommas = true }).AsObject();
 }
 
 string fontPath = Path.GetDirectoryName(importFile);
@@ -53,7 +50,7 @@ and putting it in the same directory as the .yy file."
 
 bool tginExists = Data.TextureGroupInfo is not null;
 // Default to putting the font into the default texgroup
-UndertaleTextureGroupInfo fontTexGroup;
+UndertaleTextureGroupInfo fontTexGroup = null;
 if (tginExists)
     fontTexGroup = Data.TextureGroupInfo.ByName("Default");
 /*
@@ -131,7 +128,7 @@ font.Texture = texturePageItem;
 font.Bold = (bool)fontData["bold"];
 font.Italic = (bool)fontData["italic"];
 // FIXME: Potentially causes float precision to be lost
-font.EmSize = (uint)fontData["size"];
+font.EmSize = (float)fontData["size"];
 // Save font size as a float in GMS2.3+ (shouldn't UML always save EmSize as a float for GMS2.3+ games??)
 font.EmSizeIsFloat = Data.IsVersionAtLeast(2, 3);
 font.Charset = (byte)fontData["charset"];
@@ -151,7 +148,7 @@ if (fontData.ContainsKey("lineHeight"))
 
 // FIXME: Too complicated?
 List<int> charRangesUppersAndLowers = new();
-foreach (JObject range in fontData["ranges"].Values<JObject>())
+foreach (var range in fontData["ranges"].AsArray())
 {
     charRangesUppersAndLowers.Add((int)range["upper"]);
     charRangesUppersAndLowers.Add((int)range["lower"]);
@@ -164,9 +161,10 @@ font.RangeEnd = (uint)charRangesUppersAndLowers.DefaultIfEmpty(0xFFFF).LastOrDef
 List<UndertaleFont.Glyph> glyphs = new();
 // From what I've seen, the keys of the objects in glyphs is just
 // the character property of the object itself but in string form 
-foreach (KeyValuePair<string, JToken> glyphKVEntry in (JObject)fontData["glyphs"])
+
+foreach (KeyValuePair<string, JsonNode> glyphKVEntry in fontData["glyphs"].AsObject())
 {
-    var glyphData = (JObject)glyphKVEntry.Value;
+    JsonNode glyphData = glyphKVEntry.Value;
     glyphs.Add(new UndertaleFont.Glyph()
     {
         Character = (ushort)glyphData["character"],
@@ -186,7 +184,7 @@ foreach (var glyph in glyphs)
 
 glyphs = font.Glyphs.ToList();
 // TODO: applyKerning??
-foreach (JObject kerningPair in fontData["kerningPairs"]?.Values<JObject>())
+foreach (JsonNode kerningPair in fontData["kerningPairs"]?.AsArray())
 {
     // Why do I need to do this. Thanks YoYo
     var first = (ushort)kerningPair["first"];

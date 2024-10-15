@@ -12,12 +12,15 @@ using System.IO.Pipes;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Net.Http.Json;
 using System.Reflection;
 using System.Runtime;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Text;
+using System.Text.Json;
+using System.Text.Json.Nodes;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
@@ -34,8 +37,6 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Scripting;
 using Microsoft.CodeAnalysis.Scripting;
 using Microsoft.Win32;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using Ookii.Dialogs.Wpf;
 using UndertaleModLib;
 using UndertaleModLib.Decompiler;
@@ -44,7 +45,6 @@ using UndertaleModLib.ModelsDebug;
 using UndertaleModLib.Scripting;
 using UndertaleModLib.Util;
 using UndertaleModTool.Windows;
-using SystemJson = System.Text.Json;
 
 namespace UndertaleModTool
 {
@@ -246,7 +246,6 @@ namespace UndertaleModTool
                                             "System.Text.RegularExpressions")
                                 .AddReferences(typeof(UndertaleObject).GetTypeInfo().Assembly,
                                                 GetType().GetTypeInfo().Assembly,
-                                                typeof(JsonConvert).GetTypeInfo().Assembly,
                                                 typeof(System.Text.RegularExpressions.Regex).GetTypeInfo().Assembly,
                                                 typeof(ImageMagick.MagickImage).GetTypeInfo().Assembly,
                                                 typeof(Underanalyzer.Decompiler.DecompileContext).Assembly)
@@ -1358,10 +1357,10 @@ namespace UndertaleModTool
 
                                 try
                                 {
-                                    Data.GMLCache = SystemJson.JsonSerializer.Deserialize<ConcurrentDictionary<string, string>>(cacheStr);
+                                    Data.GMLCache = JsonSerializer.Deserialize<ConcurrentDictionary<string, string>>(cacheStr);
 
                                     if (failedStr is not null)
-                                        Data.GMLCacheFailed = SystemJson.JsonSerializer.Deserialize<List<string>>(failedStr);
+                                        Data.GMLCacheFailed = JsonSerializer.Deserialize<List<string>>(failedStr);
                                     else
                                         Data.GMLCacheFailed = new();
                                 }
@@ -1451,12 +1450,12 @@ namespace UndertaleModTool
                     using (FileStream fs = File.Create(Path.Combine(cacheDirPath, num.ToString())))
                     {
                         fs.Write(Encoding.UTF8.GetBytes(hash + '\n'));
-                        fs.Write(SystemJson.JsonSerializer.SerializeToUtf8Bytes(sortedCache));
+                        fs.Write(JsonSerializer.SerializeToUtf8Bytes(sortedCache));
 
                         if (Data.GMLCacheFailed.Count > 0)
                         {
                             fs.WriteByte((byte)'\n');
-                            fs.Write(SystemJson.JsonSerializer.SerializeToUtf8Bytes(Data.GMLCacheFailed));
+                            fs.Write(JsonSerializer.SerializeToUtf8Bytes(Data.GMLCacheFailed));
                         }
                     }
 
@@ -1464,8 +1463,8 @@ namespace UndertaleModTool
 
                     Data.GMLCacheWasSaved = true;
                 }
-            });
-        }
+                });
+            }
 
         public async Task<bool> GenerateGMLCache(GlobalDecompileContext decompileContext = null, object dialog = null, bool clearGMLEditedBefore = false)
         {
@@ -3023,13 +3022,13 @@ namespace UndertaleModTool
                 return;
             }
             // Parse it as JSON
-            var actionInfo = JObject.Parse(await result.Content.ReadAsStringAsync());
-            var actionList = (JArray)actionInfo["workflow_runs"];
-            JObject action = null;
+            var actionInfo = await result.Content.ReadFromJsonAsync<JsonObject>();
+            var actionList = (JsonArray)actionInfo["workflow_runs"];
+            JsonObject action = null;
 
             for (int index = 0; index < actionList.Count; index++)
             {
-                var currentAction = (JObject)actionList[index];
+                var currentAction = (JsonObject)actionList[index];
                 if (currentAction["name"].ToString() == detectedActionName)
                 {
                     action = currentAction;
@@ -3061,8 +3060,8 @@ namespace UndertaleModTool
                 return;
             }
 
-            var artifactInfo = JObject.Parse(await result2.Content.ReadAsStringAsync()); // And now parse them as JSON
-            var artifactList = (JArray)artifactInfo["artifacts"];                       // Grab the array of artifacts
+            var artifactInfo = await result2.Content.ReadFromJsonAsync<JsonObject>(); // And now parse them as JSON
+            var artifactList = (JsonArray)artifactInfo["artifacts"]; // Grab the array of artifacts
 
             if (Environment.Is64BitOperatingSystem && !Environment.Is64BitProcess)
             {
@@ -3075,10 +3074,10 @@ namespace UndertaleModTool
                 }
             }
 
-            JObject artifact = null;
+            JsonObject artifact = null;
             for (int index = 0; index < artifactList.Count; index++)
             {
-                var currentArtifact = (JObject)artifactList[index];
+                var currentArtifact = (JsonObject)artifactList[index];
                 string artifactName = (string)currentArtifact["name"];
 
                 // If the tool ever becomes cross platform this needs to check the OS
