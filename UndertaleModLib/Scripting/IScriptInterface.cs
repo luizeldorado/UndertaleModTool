@@ -159,13 +159,6 @@ public interface IScriptInterface
     bool RunUMTScript(string path);
 
     /// <summary>
-    /// Lint whether a file is C# UndertaleModLib compatible.
-    /// </summary>
-    /// <param name="path">File path to the script file to lint.</param>
-    /// <returns>A <see cref="bool"/> that indicates whether the linting was successful.</returns>
-    bool LintUMTScript(string path);
-
-    /// <summary>
     /// Initializes a Script Dialog with default values
     /// </summary>
     void InitializeScriptDialog();

@@ -578,40 +578,6 @@ public partial class Program : IScriptInterface
     }
 
     /// <inheritdoc/>
-    public bool LintUMTScript(string path)
-    {
-        // By Grossley
-        if (!File.Exists(path))
-        {
-            ScriptError(path + " does not exist!");
-            return false;
-        }
-        try
-        {
-            CancellationTokenSource source = new CancellationTokenSource(100);
-            CancellationToken token = source.Token;
-            CSharpScript.EvaluateAsync(File.ReadAllText(path, Encoding.UTF8), CliScriptOptions.WithFilePath(path).WithFileEncoding(Encoding.UTF8), this, typeof(IScriptInterface), token);
-        }
-        catch (CompilationErrorException exc)
-        {
-            ScriptError(exc.Message, "Script compile error");
-            ScriptExecutionSuccess = false;
-            ScriptErrorMessage = exc.Message;
-            ScriptErrorType = "CompilationErrorException";
-            return false;
-        }
-        catch (Exception)
-        {
-            // Using the 100 MS timer it can time out before successfully running, compilation errors are fast enough to get through.
-            ScriptExecutionSuccess = true;
-            ScriptErrorMessage = "";
-            ScriptErrorType = "";
-            return true;
-        }
-        return true;
-    }
-
-    /// <inheritdoc/>
     public void ImportGMLString(string codeName, string gmlCode, bool doParse = true, bool checkDecompiler = false)
     {
         ImportCode(codeName, gmlCode, true, doParse, true, checkDecompiler);

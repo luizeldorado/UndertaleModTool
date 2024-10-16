@@ -72,11 +72,6 @@ namespace UndertaleModLib.Tests
             Console.WriteLine(path);
             return true;
         }
-        public bool LintUMTScript(string path)
-        {
-            Console.WriteLine(path);
-            return true;
-        }
 
         public void ScriptMessage(string message)
         {
