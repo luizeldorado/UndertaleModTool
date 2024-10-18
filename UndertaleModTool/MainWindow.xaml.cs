@@ -185,10 +185,10 @@ namespace UndertaleModTool
         private LoaderDialog scriptDialog;
 
         // Related to profile system and appdata
-        public byte[] MD5PreviouslyLoaded = new byte[13];
-        public byte[] MD5CurrentlyLoaded = new byte[15];
+        public byte[] MD5PreviouslyLoaded = new byte[16];
+        public byte[] MD5CurrentlyLoaded = new byte[16];
         public static string AppDataFolder => Settings.AppDataFolder;
-        public static string ProfilesFolder = Path.Combine(Settings.AppDataFolder, "Profiles");
+        public static string ProfilesFolder = Path.Join(Settings.AppDataFolder, "Profiles");
         public string ProfileHash = "Unknown";
         public bool CrashedWhileEditing = false;
 
@@ -660,10 +660,14 @@ namespace UndertaleModTool
             DisposeGameData();
 
             FilePath = null;
+
             Data = UndertaleData.CreateNew();
+            Data.ToolInfo.ProfileMode = SettingsWindow.ProfileModeEnabled;
             Data.ToolInfo.AppDataProfiles = ProfilesFolder;
+            //Data.ToolInfo.CurrentMD5 = "Unknown";
             Data.ToolInfo.DecompilerSettings = SettingsWindow.DecompilerSettings;
             Data.ToolInfo.InstanceIdPrefix = () => SettingsWindow.InstanceIdPrefix;
+
             CloseChildFiles();
             OnPropertyChanged("Data");
             OnPropertyChanged("FilePath");
@@ -1036,15 +1040,10 @@ namespace UndertaleModTool
                         {
                             CanSave = true;
                             CanSafelySave = true;
-                            await UpdateProfile(data, filename);
-                            if (data != null)
-                            {
-                                data.ToolInfo.ProfileMode = SettingsWindow.ProfileModeEnabled;
-                                data.ToolInfo.DecompilerSettings = SettingsWindow.DecompilerSettings;
-                                data.ToolInfo.InstanceIdPrefix = () => SettingsWindow.InstanceIdPrefix;
-                                data.ToolInfo.CurrentMD5 = BitConverter.ToString(MD5CurrentlyLoaded).Replace("-", "").ToLowerInvariant();
-                            }
                         }
+
+                        await UpdateProfile(data, filename);
+
                         if (data.IsYYC())
                         {
                             this.ShowWarning("This game uses YYC (YoYo Compiler), which means the code is embedded into the game executable. This configuration is currently not fully supported; continue at your own risk.", "YYC");
@@ -1063,14 +1062,16 @@ namespace UndertaleModTool
                             await SaveGMLCache(FilePath, false, dialog);
 
                         Data = data;
+                        Data.ToolInfo.ProfileMode = SettingsWindow.ProfileModeEnabled;
+                        Data.ToolInfo.AppDataProfiles = ProfilesFolder;
+                        Data.ToolInfo.CurrentMD5 = ProfileHash;
+                        Data.ToolInfo.DecompilerSettings = SettingsWindow.DecompilerSettings;
+                        Data.ToolInfo.InstanceIdPrefix = () => SettingsWindow.InstanceIdPrefix;
 
                         await LoadGMLCache(filename, dialog);
                         UndertaleCachedImageLoader.Reset();
                         CachedTileDataLoader.Reset();
-
-                        Data.ToolInfo.AppDataProfiles = ProfilesFolder;
-                        Data.ToolInfo.DecompilerSettings = SettingsWindow.DecompilerSettings;
-                        Data.ToolInfo.InstanceIdPrefix = () => SettingsWindow.InstanceIdPrefix;
+                        
                         FilePath = filename;
                         OnPropertyChanged("Data");
                         OnPropertyChanged("FilePath");
@@ -1080,10 +1081,8 @@ namespace UndertaleModTool
                                                       ? "Tile sets"
                                                       : "Backgrounds & Tile sets";
 
-#pragma warning disable CA1416
                         UndertaleCodeEditor.gettext = null;
                         UndertaleCodeEditor.gettextJSON = null;
-#pragma warning restore CA1416
                     }
 
                     dialog.Hide();
@@ -1156,8 +1155,7 @@ namespace UndertaleModTool
                                 string output;
                                 try
                                 {
-                                    output = new Underanalyzer.Decompiler.DecompileContext(context, code, Data.ToolInfo.DecompilerSettings)
-                                        .DecompileToString();
+                                    output = code.GetDecompiledGML(Data, context);
                                 }
                                 catch (Exception e)
                                 {
@@ -1275,13 +1273,10 @@ namespace UndertaleModTool
                 }
                 if (Data != null)
                 {
-                    Data.ToolInfo.ProfileMode = SettingsWindow.ProfileModeEnabled;
-                    Data.ToolInfo.CurrentMD5 = BitConverter.ToString(MD5CurrentlyLoaded).Replace("-", "").ToLowerInvariant();
+                    Data.ToolInfo.CurrentMD5 = ProfileHash;
                 }
 
-#pragma warning disable CA1416
                 UndertaleCodeEditor.gettextJSON = null;
-#pragma warning restore CA1416
 
                 Dispatcher.Invoke(() =>
                 {
@@ -1520,9 +1515,7 @@ namespace UndertaleModTool
                     {
                         try
                         {
-                            Data.GMLCache[code.Name.Content] =
-                                new Underanalyzer.Decompiler.DecompileContext(decompileContext, code, Data.ToolInfo.DecompilerSettings)
-                                    .DecompileToString();
+                            Data.GMLCache[code.Name.Content] = code.GetDecompiledGML(Data, decompileContext);
                         }
                         catch
                         {
@@ -1570,10 +1563,7 @@ namespace UndertaleModTool
                         {
                             try
                             {
-                                Data.GMLCache[code.Name.Content] =
-                                    new Underanalyzer.Decompiler.DecompileContext(decompileContext, code, Data.ToolInfo.DecompilerSettings)
-                                        .DecompileToString();
-
+                                Data.GMLCache[code.Name.Content] = code.GetDecompiledGML(Data, decompileContext);
                                 Data.GMLCacheFailed.Remove(code.Name.Content); //that code compiles now
                             }
                             catch

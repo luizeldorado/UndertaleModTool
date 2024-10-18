@@ -56,13 +56,10 @@ namespace UndertaleModTool
 
         public void NukeProfileGML(string codeName)
         {
-            // This is written as intended
-            string path = Path.Combine(ProfilesFolder, Data.ToolInfo.CurrentMD5, "Temp", codeName + ".gml");
-            if (File.Exists(path))
-            {
-                File.Delete(path);
-            }
+            UndertaleCode code = Data.Code.ByName(codeName);
+            code.DeleteProfileModeGML(Data);
         }
+
         public void ReapplyProfileCode()
         {
             foreach (UndertaleCode code in Data.Code)
@@ -107,75 +104,24 @@ namespace UndertaleModTool
         }
         public void ReplaceTextInGML(UndertaleCode code, string keyword, string replacement, bool caseSensitive = false, bool isRegex = false, GlobalDecompileContext context = null, IDecompileSettings settings = null)
         {
-            if (code.ParentEntry is not null)
+            if (code is null || code.ParentEntry is not null)
                 return;
 
             EnsureDataLoaded();
 
-            string passBack = "";
-            string codeName = code.Name.Content;
-            GlobalDecompileContext globalDecompileContext = context is null ? new(Data) : context;
+            try
+            {
+                string originalCode = code.GetGML(Data, context, settings);
+                string passBack = GetPassBack(originalCode, keyword, replacement, caseSensitive, isRegex);
+                // No need to compile something unchanged
+                if (passBack == originalCode)
+                    return;
 
-            if (!Data.ToolInfo.ProfileMode)
-            {
-                try
-                {
-                    // It would just be recompiling an empty string and messing with null entries seems bad
-                    if (code is null)
-                        return;
-                    string originalCode = new Underanalyzer.Decompiler.DecompileContext(globalDecompileContext, code, settings ?? Data.ToolInfo.DecompilerSettings)
-                        .DecompileToString();
-                    passBack = GetPassBack(originalCode, keyword, replacement, caseSensitive, isRegex);
-                    // No need to compile something unchanged
-                    if (passBack == originalCode)
-                        return;
-                    code.ReplaceGML(passBack, Data);
-                }
-                catch (Exception exc)
-                {
-                    throw new Exception("Error during GML code replacement:\n" + exc.ToString());
-                }
+                code.SetGML(Data, passBack);
             }
-            else
+            catch (Exception exc)
             {
-                try
-                {
-                    string path = Path.Combine(ProfilesFolder, Data.ToolInfo.CurrentMD5, "Temp", codeName + ".gml");
-                    if (File.Exists(path))
-                    {
-                        string originalCode = File.ReadAllText(path);
-                        passBack = GetPassBack(originalCode, keyword, replacement, caseSensitive, isRegex);
-                        // No need to compile something unchanged
-                        if (passBack == originalCode)
-                            return;
-                        File.WriteAllText(path, passBack);
-                        code.ReplaceGML(passBack, Data);
-                    }
-                    else
-                    {
-                        try
-                        {
-                            // It would just be recompiling an empty string and messing with null entries seems bad
-                            if (code is null)
-                                return;
-                            string originalCode = new Underanalyzer.Decompiler.DecompileContext(globalDecompileContext, code, Data.ToolInfo.DecompilerSettings)
-                                .DecompileToString();
-                            passBack = GetPassBack(originalCode, keyword, replacement, caseSensitive, isRegex);
-                            // No need to compile something unchanged
-                            if (passBack == originalCode)
-                                return;
-                            code.ReplaceGML(passBack, Data);
-                        }
-                        catch (Exception exc)
-                        {
-                            throw new Exception("Error during GML code replacement:\n" + exc.ToString());
-                        }
-                    }
-                }
-                catch (Exception exc)
-                {
-                    throw new Exception("Error during writing of GML code to profile:\n" + exc.ToString() + "\n\nCode:\n\n" + passBack);
-                }
+                throw new Exception("Error during GML code replacement:\n" + exc.ToString());
             }
         }
 
@@ -432,19 +378,14 @@ namespace UndertaleModTool
             {
                 if (IsGML)
                 {
-                    code.ReplaceGML(gmlCode, Data);
-
-                    // Write to profile if necessary.
-                    string path = Path.Combine(ProfilesFolder, Data.ToolInfo.CurrentMD5, "Temp", codeName + ".gml");
-                    if (File.Exists(path))
-                        File.WriteAllText(path, GetDecompiledText(code));
+                    code.SetGML(Data, gmlCode);
                 }
                 else
                 {
                     var instructions = Assembler.Assemble(gmlCode, Data);
                     code.Replace(instructions);
                     if (destroyASM)
-                        NukeProfileGML(codeName);
+                        code.DeleteProfileModeGML(Data);
                 }
             }
             catch (Exception ex)
@@ -459,7 +400,7 @@ namespace UndertaleModTool
                 }
                 else
                 {
-                    code.ReplaceGML("", Data);
+                    code.SetGML(Data, "");
                 }
             }
         }

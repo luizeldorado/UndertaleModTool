@@ -44,6 +44,10 @@ namespace UndertaleModTool
             get => Settings.Instance.ProfileModeEnabled;
             set
             {
+                if (mainWindow.Data is not null)
+                {
+                    mainWindow.Data.ToolInfo.ProfileMode = value;
+                }
                 Settings.Instance.ProfileModeEnabled = value;
                 Settings.Save();
             }

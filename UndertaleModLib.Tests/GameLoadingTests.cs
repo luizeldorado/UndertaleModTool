@@ -35,7 +35,7 @@ namespace UndertaleModLib.Tests
                 //Console.WriteLine(code.Name.Content);
                 try
                 {
-                    new DecompileContext(context, code, data.ToolInfo.DecompilerSettings).DecompileToString();
+                    code.GetDecompiledGML(data, context);
                 }
                 catch (Exception e)
                 {

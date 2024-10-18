@@ -8,6 +8,7 @@ using System.Windows;
 using System.Windows.Threading;
 using Underanalyzer.Decompiler;
 using UndertaleModLib;
+using UndertaleModLib.Compiler;
 using UndertaleModLib.Decompiler;
 using UndertaleModLib.Models;
 using UndertaleModLib.Scripting;
@@ -18,21 +19,17 @@ namespace UndertaleModTool
 
     public partial class MainWindow : Window, INotifyPropertyChanged, IScriptInterface
     {
-        public string GetDecompiledText(string codeName, GlobalDecompileContext context = null, IDecompileSettings settings = null)
-        {
-            return GetDecompiledText(Data.Code.ByName(codeName), context, settings);
-        }
         public string GetDecompiledText(UndertaleCode code, GlobalDecompileContext context = null, IDecompileSettings settings = null)
         {
+            if (code is null)
+                return "";
             if (code.ParentEntry is not null)
                 return $"// This code entry is a reference to an anonymous function within \"{code.ParentEntry.Name.Content}\", decompile that instead.";
 
-            GlobalDecompileContext globalDecompileContext = context is null ? new(Data) : context;
             try
             {
-                return code != null
-                    ? new Underanalyzer.Decompiler.DecompileContext(globalDecompileContext, code, settings ?? Data.ToolInfo.DecompilerSettings).DecompileToString()
-                    : "";
+                //return code.GetGML(Data, context, settings); // Use profile mode
+                return code.GetDecompiledGML(Data, context, settings);
             }
             catch (Exception e)
             {
@@ -40,20 +37,28 @@ namespace UndertaleModTool
             }
         }
 
+        public string GetDecompiledText(string codeName, GlobalDecompileContext context = null, IDecompileSettings settings = null)
+        {
+            return GetDecompiledText(Data.Code.ByName(codeName), context, settings);
+        }
+
         public string GetDisassemblyText(UndertaleCode code)
         {
+            if (code is null)
+                return "";
             if (code.ParentEntry is not null)
                 return $"; This code entry is a reference to an anonymous function within \"{code.ParentEntry.Name.Content}\", disassemble that instead.";
 
             try
             {
-                return code != null ? code.Disassemble(Data.Variables, Data.CodeLocals.For(code)) : "";
+                return code.Disassemble(Data.Variables, Data.CodeLocals.For(code));
             }
             catch (Exception e)
             {
                 return "/*\nDISASSEMBLY FAILED!\n\n" + e.ToString() + "\n*/"; // Please don't
             }
         }
+
         public string GetDisassemblyText(string codeName)
         {
             return GetDisassemblyText(Data.Code.ByName(codeName));

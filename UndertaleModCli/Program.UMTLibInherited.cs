@@ -419,19 +419,19 @@ public partial class Program : IScriptInterface
     /// <inheritdoc/>
     public string GetDecompiledText(UndertaleCode code, GlobalDecompileContext context = null, IDecompileSettings settings = null)
     {
+        if (code is null)
+            return "";
         if (code.ParentEntry is not null)
             return $"// This code entry is a reference to an anonymous function within \"{code.ParentEntry.Name.Content}\", decompile that instead.";
 
-        GlobalDecompileContext decompileContext = context is null ? new(Data) : context;
         try
         {
-            return code != null
-                ? new Underanalyzer.Decompiler.DecompileContext(decompileContext, code, settings ?? Data.ToolInfo.DecompilerSettings).DecompileToString()
-                : "";
+            //return code.GetGML(Data, context, settings); // Use profile mode
+            return code.GetDecompiledGML(Data, context, settings);
         }
         catch (Exception e)
         {
-            return "/*\nDECOMPILER FAILED!\n\n" + e + "\n*/";
+            return "/*\nDECOMPILER FAILED!\n\n" + e.ToString() + "\n*/";
         }
     }
 
@@ -444,16 +444,18 @@ public partial class Program : IScriptInterface
     /// <inheritdoc/>
     public string GetDisassemblyText(UndertaleCode code)
     {
+        if (code is null)
+            return "";
         if (code.ParentEntry is not null)
             return $"; This code entry is a reference to an anonymous function within \"{code.ParentEntry.Name.Content}\", disassemble that instead.";
 
         try
         {
-            return code != null ? code.Disassemble(Data.Variables, Data.CodeLocals.For(code)) : "";
+            return code.Disassemble(Data.Variables, Data.CodeLocals.For(code));
         }
         catch (Exception e)
         {
-            return "/*\nDISASSEMBLY FAILED!\n\n" + e + "\n*/"; // Please don't
+            return "/*\nDISASSEMBLY FAILED!\n\n" + e.ToString() + "\n*/"; // Please don't
         }
     }
 
@@ -614,37 +616,24 @@ public partial class Program : IScriptInterface
     /// <inheritdoc/>
     public void ReplaceTextInGML(UndertaleCode code, string keyword, string replacement, bool caseSensitive = false, bool isRegex = false, GlobalDecompileContext context = null, IDecompileSettings settings = null)
     {
-        if (code == null) throw new ArgumentNullException(nameof(code));
-        if (code.ParentEntry is not null)
+        if (code is null || code.ParentEntry is not null)
             return;
 
         EnsureDataLoaded();
 
-        string passBack = "";
-        GlobalDecompileContext decompileContext = context is null ? new(Data) : context;
+        try
+        {
+            string originalCode = code.GetGML(Data, context, settings);
+            string passBack = GetPassBack(originalCode, keyword, replacement, caseSensitive, isRegex);
+            // No need to compile something unchanged
+            if (passBack == originalCode)
+                return;
 
-        if (!Data.ToolInfo.ProfileMode)
-        {
-            try
-            {
-                // It would just be recompiling an empty string and messing with null entries seems bad
-                if (code is null)
-                    return;
-                string originalCode = new Underanalyzer.Decompiler.DecompileContext(decompileContext, code, settings ?? Data.ToolInfo.DecompilerSettings).DecompileToString();
-                passBack = GetPassBack(originalCode, keyword, replacement, caseSensitive, isRegex);
-                // No need to compile something unchanged
-                if (passBack == originalCode)
-                    return;
-                code.ReplaceGML(passBack, Data);
-            }
-            catch (Exception exc)
-            {
-                throw new Exception("Error during GML code replacement:\n" + exc);
-            }
+            code.SetGML(Data, passBack);
         }
-        else
+        catch (Exception exc)
         {
-            throw new Exception("This UndertaleData is set to use profile mode, but UndertaleModCLI does not support profile mode.");
+            throw new Exception("Error during GML code replacement:\n" + exc.ToString());
         }
     }
     #endregion
@@ -1078,14 +1067,14 @@ public partial class Program : IScriptInterface
         {
             if (isGML)
             {
-                code.ReplaceGML(gmlCode, Data);
+                code.SetGML(Data, gmlCode);
             }
             else
             {
                 var instructions = Assembler.Assemble(gmlCode, Data);
                 code.Replace(instructions);
                 if (destroyASM)
-                    NukeProfileGML(codeName);
+                    code.DeleteProfileModeGML(Data);
             }
         }
         catch (Exception ex)
@@ -1100,7 +1089,7 @@ public partial class Program : IScriptInterface
             }
             else
             {
-                code.ReplaceGML("", Data);
+                code.SetGML(Data, "");
             }
         }
     }
