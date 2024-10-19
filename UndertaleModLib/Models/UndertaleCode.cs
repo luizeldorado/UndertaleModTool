@@ -1708,7 +1708,7 @@ public class UndertaleCode : UndertaleNamedResource, UndertaleObjectWithBlobs, I
         if (data.ToolInfo.ProfileMode)
         {
             string path = GetProfileModeGMLPath(data);
-            if (File.Exists(path))
+            if (path is not null && File.Exists(path))
                 return File.ReadAllText(path);
         }
         return null;
@@ -1736,14 +1736,17 @@ public class UndertaleCode : UndertaleNamedResource, UndertaleObjectWithBlobs, I
 
             // Set profile mode code
             string path = GetProfileModeGMLPath(data);
-            if (data.ToolInfo.ProfileMode)
+            if (path is not null)
             {
-                File.WriteAllText(path, text);
-            }
-            else
-            {
-                if (File.Exists(path))
-                    File.Delete(path);
+                if (data.ToolInfo.ProfileMode)
+                {
+                    File.WriteAllText(path, text);
+                }
+                else
+                {
+                    if (File.Exists(path))
+                        File.Delete(path);
+                }
             }
         }
 
@@ -1752,6 +1755,7 @@ public class UndertaleCode : UndertaleNamedResource, UndertaleObjectWithBlobs, I
 
     string GetProfileModeGMLPath(UndertaleData data)
     {
+        if (data.ToolInfo.AppDataProfiles is null) return null;
         return Path.Join(data.ToolInfo.AppDataProfiles, data.ToolInfo.CurrentMD5, "Temp", Name.Content + ".gml");
     }
 
