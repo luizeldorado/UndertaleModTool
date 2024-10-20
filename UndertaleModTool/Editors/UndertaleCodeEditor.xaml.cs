@@ -42,9 +42,6 @@ namespace UndertaleModTool
         public UndertaleCode CurrentDisassembled = null;
         public UndertaleCode CurrentDecompiled = null;
         public List<string> CurrentLocals = new();
-        public string ProfileHash = mainWindow.ProfileHash;
-        public string MainPath = Path.Combine(MainWindow.ProfilesFolder, mainWindow.ProfileHash, "Main");
-        public string TempPath = Path.Combine(MainWindow.ProfilesFolder, mainWindow.ProfileHash, "Temp");
 
         public bool DecompiledFocused = false;
         public bool DecompiledChanged = false;
@@ -252,8 +249,6 @@ namespace UndertaleModTool
         private async void TabControl_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             UndertaleCode code = this.DataContext as UndertaleCode;
-            Directory.CreateDirectory(MainPath);
-            Directory.CreateDirectory(TempPath);
             if (code == null)
                 return;
 
@@ -874,12 +869,12 @@ namespace UndertaleModTool
 
             CompileContext compileContext = null;
             string text = DecompiledEditor.Text;
-            var dispatcher = Dispatcher;
+
             Task t = Task.Run(() =>
             {
                 try
                 {
-                    compileContext = code.SetGML(data, text);
+                    compileContext = code.SetGML(data, text, f => Dispatcher.Invoke(f));
                 }
                 catch (Exception ex)
                 {
@@ -902,7 +897,7 @@ namespace UndertaleModTool
             if (compileContext.HasError)
             {
                 dialog.TryClose();
-                mainWindow.ShowError(Truncate(compileContext.ResultError, 512), "Compiler error");
+                mainWindow.ShowError(compileContext.ResultError, "Compiler error");
                 return;
             }
 
@@ -985,8 +980,7 @@ namespace UndertaleModTool
             try
             {
                 var instructions = Assembler.Assemble(DisassemblyEditor.Text, data);
-                code.Replace(instructions);
-                mainWindow.NukeProfileGML(code.Name.Content);
+                code.SetASM(data, instructions);
             }
             catch (Exception ex)
             {

@@ -1650,6 +1650,37 @@ public class UndertaleCode : UndertaleNamedResource, UndertaleObjectWithBlobs, I
     }
 
     /// <summary>
+    /// Append GML instructions at the end of this code entry.
+    /// </summary>
+    /// <param name="gmlCode">The GML code to append.</param>
+    /// <param name="data">From which data file the GML code is coming from.</param>
+    /// <exception cref="Exception"> if the GML code does not compile or if there's an error writing the code to the profile entry.</exception>
+    public void AppendGML(string gmlCode, UndertaleData data)
+    {
+        try
+        {
+            string oldGmlCode = GetGML(data);
+            if (oldGmlCode is null)
+                return;
+
+            CompileContext context = SetGML(data, oldGmlCode + "\n" + gmlCode);
+
+            if (context is null)
+                return;
+
+            if (!context.SuccessfulCompile || context.HasError)
+            {
+                Console.WriteLine(gmlCode);
+                throw new Exception("GML Compile Error: " + context.ResultError);
+            }
+        }
+        catch (DecompilerException e)
+        {
+            throw new Exception("GML Decompile Error: " + e.Message);
+        }
+    }
+
+    /// <summary>
     /// Replaces <b>all</b> instructions currently existing in this code entry with another set of GML instructions.
     /// </summary>
     /// <param name="gmlCode">The new GML code for this code entry.</param>
@@ -1720,12 +1751,14 @@ public class UndertaleCode : UndertaleNamedResource, UndertaleObjectWithBlobs, I
     /// </summary>
     /// <remarks><paramref name="text"/> is compiled and, if successful, the assembly is set in this instance. If profile mode is enabled, it also updates the related GML file. If it's disabled, it will remove the file.</remarks>
     /// <returns>A <see cref="CompileContext"/>, which has the properties SuccessfulCompile, HasError and ResultError for error checking, or null if it has a parent entry.</returns>
-    public CompileContext SetGML(UndertaleData data, string text)
+    public CompileContext SetGML(UndertaleData data, string text, Compiler.Compiler.MainThreadDelegate mainThreadDelegate = null)
     {
         if (ParentEntry is not null) return null;
 
         // Compile
-        CompileContext compileContext = Compiler.Compiler.CompileGMLText(text, data, this);
+        CompileContext compileContext = mainThreadDelegate is null
+            ? Compiler.Compiler.CompileGMLText(text, data, this)
+            : Compiler.Compiler.CompileGMLText(text, data, this, mainThreadDelegate);
 
         if (compileContext.SuccessfulCompile)
         {
@@ -1753,6 +1786,20 @@ public class UndertaleCode : UndertaleNamedResource, UndertaleObjectWithBlobs, I
         return compileContext;
     }
 
+    public void SetASM(UndertaleData data, IList<UndertaleInstruction> instructions)
+    {
+        if (ParentEntry is not null) return;
+
+        Replace(instructions);
+
+        // TODO: Invalidate cache?
+
+        // Invalidade profile mode code
+        string path = GetProfileModeGMLPath(data);
+        if (path is not null && File.Exists(path))
+            File.Delete(path);
+    }
+
     string GetProfileModeGMLPath(UndertaleData data)
     {
         if (data.ToolInfo.AppDataProfiles is null) return null;
@@ -1762,7 +1809,7 @@ public class UndertaleCode : UndertaleNamedResource, UndertaleObjectWithBlobs, I
     public void DeleteProfileModeGML(UndertaleData data)
     {
         string path = GetProfileModeGMLPath(data);
-        if (File.Exists(path))
+        if (path is not null && File.Exists(path))
             File.Delete(path);
     }
 
