@@ -1,6 +1,7 @@
 ﻿using System;
 using System.ComponentModel;
 using System.IO;
+using System.Linq;
 using System.Security.Cryptography;
 using System.Threading;
 using System.Threading.Tasks;
@@ -8,7 +9,6 @@ using System.Windows;
 using System.Windows.Threading;
 using Underanalyzer.Decompiler;
 using UndertaleModLib;
-using UndertaleModLib.Compiler;
 using UndertaleModLib.Decompiler;
 using UndertaleModLib.Models;
 using UndertaleModLib.Scripting;
@@ -64,83 +64,6 @@ namespace UndertaleModTool
             return GetDisassemblyText(Data.Code.ByName(codeName));
         }
 
-        public void CrashCheck()
-        {
-            try
-            {
-                string lastEditedLocation = Path.Combine(ProfilesFolder, "LastEdited.txt");
-                if (Data == null && File.Exists(lastEditedLocation))
-                {
-                    CrashedWhileEditing = true;
-                    string[] crashRecoveryData = File.ReadAllText(lastEditedLocation).Split('\n');
-                    string dataRecoverLocation = Path.Combine(ProfilesFolder, crashRecoveryData[0].Trim(), "Temp");
-                    string profileHashOfCrashedFile;
-                    string reportedHashOfCrashedFile = crashRecoveryData[0].Trim();
-                    string pathOfCrashedFile = crashRecoveryData[1];
-                    string pathOfRecoverableCode = Path.Combine(ProfilesFolder, reportedHashOfCrashedFile);
-                    if (File.Exists(pathOfCrashedFile))
-                    {
-                        using (var md5Instance = MD5.Create())
-                        {
-                            using (var stream = File.OpenRead(pathOfCrashedFile))
-                            {
-                                profileHashOfCrashedFile = BitConverter.ToString(md5Instance.ComputeHash(stream)).Replace("-", "").ToLowerInvariant();
-                            }
-                        }
-                        if (Directory.Exists(Path.Combine(ProfilesFolder, reportedHashOfCrashedFile)) &&
-                            profileHashOfCrashedFile == reportedHashOfCrashedFile)
-                        {
-                            if (this.ShowQuestion("UndertaleModTool crashed during usage last time while editing " + pathOfCrashedFile + ", would you like to recover your code now?") == MessageBoxResult.Yes)
-                            {
-                                LoadFile(pathOfCrashedFile, true).ContinueWith((t) => { });
-                                if (Data == null)
-                                {
-                                    this.ShowError("Failed to load data when recovering.");
-                                    return;
-                                }
-                                string[] dirFiles = Directory.GetFiles(dataRecoverLocation);
-                                int progress = 0;
-                                LoaderDialog codeLoadDialog = new LoaderDialog("Script in progress...", "Please wait...");
-                                codeLoadDialog.PreventClose = true;
-                                codeLoadDialog.Update(null, "Code entries processed: ", progress++, dirFiles.Length);
-                                codeLoadDialog.Dispatcher.Invoke(DispatcherPriority.Background, new ThreadStart(delegate { })); // Updates the UI, so you can see the progress.
-                                foreach (string file in dirFiles)
-                                {
-                                    ImportGMLFile(file);
-                                    codeLoadDialog.Update(null, "Code entries processed: ", progress++, dirFiles.Length);
-                                    codeLoadDialog.Dispatcher.Invoke(DispatcherPriority.Background, new ThreadStart(delegate { })); // Updates the UI, so you can see the progress.
-                                }
-                                codeLoadDialog.TryClose();
-                                this.ShowMessage("Completed.");
-                            }
-                            else if (this.ShowQuestion("Would you like to move this code to the \"Recovered\" folder now? Any previous code there will be cleared!") == MessageBoxResult.Yes)
-                            {
-                                this.ShowMessage("Your code can be recovered from the \"Recovered\" folder at any time.");
-                                string recoveredDir = Path.Combine(AppDataFolder, "Recovered", reportedHashOfCrashedFile);
-                                if (!Directory.Exists(Path.Combine(AppDataFolder, "Recovered")))
-                                    Directory.CreateDirectory(Path.Combine(AppDataFolder, "Recovered"));
-                                if (Directory.Exists(recoveredDir))
-                                    Directory.Delete(recoveredDir, true);
-                                Directory.Move(pathOfRecoverableCode, recoveredDir);
-                            }
-                            else
-                            {
-                                this.ShowWarning("A crash has been detected from last session. Please check the Profiles folder for recoverable data now.");
-                            }
-                        }
-                    }
-                    else
-                    {
-                        this.ShowWarning("A crash has been detected from last session. Please check the Profiles folder for recoverable data now.");
-                    }
-                }
-            }
-            catch (Exception exc)
-            {
-                this.ShowError("CrashCheck error! Send this to Grossley#2869 and make an issue on Github\n" + exc);
-            }
-        }
-
         public void CreateUMTLastEdited(string filename)
         {
             try
@@ -167,115 +90,68 @@ namespace UndertaleModTool
             }
         }
 
-        public void RevertProfile()
+        /// <summary>
+        /// Calculates the profile hash, setting MD5CurrentlyLoaded and ProfileHash. Returns the previous profile hash.
+        /// </summary>
+        async Task<string> CalculateProfileHash(string filename)
         {
-            try
+            return await Task.Run(() =>
             {
-                // We need to do this regardless, as the "Temp" folder can still change in non-profile mode.
-                // If we don't, it could cause desynchronization between modes.
-                string mainFolder = Path.Combine(ProfilesFolder, ProfileHash, "Main");
-                Directory.CreateDirectory(mainFolder);
-                string tempFolder = Path.Combine(ProfilesFolder, ProfileHash, "Temp");
-                if (Directory.Exists(tempFolder))
-                    Directory.Delete(tempFolder, true);
-                DirectoryCopy(mainFolder, tempFolder, true);
-            }
-            catch (Exception exc)
-            {
-                this.ShowError("RevertProfile error! Send this to Grossley#2869 and make an issue on Github\n" + exc);
-            }
+                string previousProfileHash = ProfileHash;
+
+                using var md5Instance = MD5.Create();
+                using var stream = File.OpenRead(filename);
+                MD5CurrentlyLoaded = md5Instance.ComputeHash(stream);
+                ProfileHash = BitConverter.ToString(MD5CurrentlyLoaded).Replace("-", "").ToLowerInvariant();
+
+                return previousProfileHash;
+            });
         }
-        public void SaveTempToMainProfile()
+
+        public void CloseProfile()
         {
-            try
-            {
-                // This extra step needs to happen for non-profile mode because the "Temp" folder can be modified in non-profile mode.
-                // If we don't, it could cause desynchronization between modes.
-                if (!SettingsWindow.ProfileModeEnabled)
-                {
-                    string mainFolder = Path.Combine(ProfilesFolder, ProfileHash, "Main");
-                    string tempFolder = Path.Combine(ProfilesFolder, ProfileHash, "Temp");
-                    Directory.CreateDirectory(tempFolder);
-                    if (Directory.Exists(mainFolder))
-                        Directory.Delete(mainFolder, true);
-                    DirectoryCopy(tempFolder, mainFolder, true);
-                }
-            }
-            catch (Exception exc)
-            {
-                this.ShowError("SaveTempToMainProfile error! Send this to Grossley#2869 and make an issue on Github\n" + exc);
-            }
+            string profile = Path.Join(ProfilesFolder, ProfileHash);
+            string profileMain = Path.Join(profile, "Main");
+            string profileTemp = Path.Join(profile, "Temp");
+
+            // Delete temp to not waste space.
+            if (Directory.Exists(profileTemp))
+                Directory.Delete(profileTemp, true);
         }
-        public async Task UpdateProfile(UndertaleData data, string filename)
+
+        public async Task LoadProfile(UndertaleData data, string filename)
         {
             FileMessageEvent?.Invoke("Calculating MD5 hash...");
 
             try
             {
-                await Task.Run(() =>
+                await CalculateProfileHash(filename);
+
+                string profile = Path.Join(ProfilesFolder, ProfileHash);
+                string profileMain = Path.Join(profile, "Main");
+                string profileTemp = Path.Join(profile, "Temp");
+
+                // If temp still exists, then the program probably crashed.
+                if (Directory.Exists(profileTemp))
                 {
-                    using (var md5Instance = MD5.Create())
-                    {
-                        using (var stream = File.OpenRead(filename))
-                        {
-                            MD5CurrentlyLoaded = md5Instance.ComputeHash(stream);
-                            MD5PreviouslyLoaded = MD5CurrentlyLoaded;
-                            ProfileHash = BitConverter.ToString(MD5PreviouslyLoaded).Replace("-", "").ToLowerInvariant();
-                        }
-                    }
-                });
+                    this.ShowMessage($"Error: There are unsaved profile mode files for the data file you are currently loading, move or delete these files before loading this profile again. Save them now before losing them.\n\nLocation: {profileTemp}");
 
-                string profDir = Path.Combine(ProfilesFolder, ProfileHash);
-                string profDirTemp = Path.Combine(profDir, "Temp");
-                string profDirMain = Path.Combine(profDir, "Main");
+                    throw new Exception("Temp folder already exists");
+                }
 
-                if (SettingsWindow.ProfileModeEnabled)
+                // Create temp so it can be modified when you access code.
+                CopyDirectoryHard(profileMain, profileTemp);
+
+                if (!SettingsWindow.ProfileModeEnabled)
+                    return;
+
+                // Create LastEdited.txt (for crash detection)
+                CreateUMTLastEdited(filename);
+
+                // Show message
+                if (!SettingsWindow.ProfileMessageShown)
                 {
-                    Directory.CreateDirectory(ProfilesFolder);
-                    if (Directory.Exists(profDir))
-                    {
-                        if (!Directory.Exists(profDirTemp) && Directory.Exists(profDirMain))
-                        {
-                            // Get the subdirectories for the specified directory.
-                            DirectoryInfo dir = new DirectoryInfo(profDirMain);
-                            Directory.CreateDirectory(profDirTemp);
-                            // Get the files in the directory and copy them to the new location.
-                            FileInfo[] files = dir.GetFiles();
-                            foreach (FileInfo file in files)
-                            {
-                                string tempPath = Path.Combine(profDirTemp, file.Name);
-                                file.CopyTo(tempPath, false);
-                            }
-                        }
-                        else if (!Directory.Exists(profDirMain) && Directory.Exists(profDirTemp))
-                        {
-                            // Get the subdirectories for the specified directory.
-                            DirectoryInfo dir = new DirectoryInfo(profDirTemp);
-                            Directory.CreateDirectory(profDirMain);
-                            // Get the files in the directory and copy them to the new location.
-                            FileInfo[] files = dir.GetFiles();
-                            foreach (FileInfo file in files)
-                            {
-                                string tempPath = Path.Combine(profDirMain, file.Name);
-                                file.CopyTo(tempPath, false);
-                            }
-                        }
-                    }
-
-                    // First generation no longer exists, it will be generated on demand while you edit.
-                    Directory.CreateDirectory(profDir);
-                    Directory.CreateDirectory(profDirMain);
-                    Directory.CreateDirectory(profDirTemp);
-                    if (!Directory.Exists(profDir) || !Directory.Exists(profDirMain) || !Directory.Exists(profDirTemp))
-                    {
-                        this.ShowWarning("Profile should exist, but does not. Insufficient permissions? Profile mode is disabled.");
-                        SettingsWindow.ProfileModeEnabled = false;
-                        return;
-                    }
-
-                    if (!SettingsWindow.ProfileMessageShown)
-                    {
-                        this.ShowMessage(@"The profile for your game loaded successfully!
+                    this.ShowMessage(@"The profile for your game loaded successfully!
 
 UndertaleModTool now uses the ""Profile"" system by default for code.
 Using the profile system, many new features are available to you!
@@ -295,149 +171,90 @@ For more in depth information, please read ""About_Profile_Mode.txt"".
 It should be noted that this system is somewhat experimental, so
 should you encounter any problems, please let us know or leave
 an issue on GitHub.");
-                        SettingsWindow.ProfileMessageShown = true;
-                    }
-                    CreateUMTLastEdited(filename);
+                    SettingsWindow.ProfileMessageShown = true;
                 }
             }
             catch (Exception exc)
             {
-                this.ShowError("UpdateProfile error! Send this to Grossley#2869 and make an issue on Github\n" + exc);
+                this.ShowError("LoadProfile error! Send this to Grossley#2869 and make an issue on Github\n" + exc);
             }
         }
-        public async Task ProfileSaveEvent(UndertaleData data, string filename)
+        public async Task SaveProfile(UndertaleData data, string filename)
         {
             FileMessageEvent?.Invoke("Calculating MD5 hash...");
 
             try
             {
-                string deleteIfModeActive = BitConverter.ToString(MD5PreviouslyLoaded).Replace("-", "").ToLowerInvariant();
-                bool copyProfile = false;
-                await Task.Run(() =>
-                {
-                    using (var md5Instance = MD5.Create())
-                    {
-                        using (var stream = File.OpenRead(filename))
-                        {
-                            MD5CurrentlyLoaded = md5Instance.ComputeHash(stream);
-                            if (BitConverter.ToString(MD5PreviouslyLoaded).Replace("-", "").ToLowerInvariant() != BitConverter.ToString(MD5CurrentlyLoaded).Replace("-", "").ToLowerInvariant())
-                            {
-                                copyProfile = true;
-                            }
-                        }
-                    }
-                });
+                string previousProfileHash = await CalculateProfileHash(filename);
+                bool copyProfile = (previousProfileHash != ProfileHash);
 
-                Directory.CreateDirectory(Path.Combine(ProfilesFolder, ProfileHash, "Main"));
-                Directory.CreateDirectory(Path.Combine(ProfilesFolder, ProfileHash, "Temp"));
-                if (!SettingsWindow.ProfileModeEnabled || data.IsYYC())
-                {
-                    MD5PreviouslyLoaded = MD5CurrentlyLoaded;
-                    ProfileHash = BitConverter.ToString(MD5PreviouslyLoaded).Replace("-", "").ToLowerInvariant();
-                    return;
-                }
-                else if (SettingsWindow.ProfileModeEnabled)
-                {
-                    Directory.CreateDirectory(ProfilesFolder);
-                    string profDir;
-                    string MD5DirNameOld;
-                    string MD5DirPathOld;
-                    string MD5DirPathOldMain;
-                    string MD5DirPathOldTemp;
-                    string MD5DirNameNew;
-                    string MD5DirPathNew;
-                    if (copyProfile)
-                    {
-                        MD5DirNameOld = BitConverter.ToString(MD5PreviouslyLoaded).Replace("-", "").ToLowerInvariant();
-                        MD5DirPathOld = Path.Combine(ProfilesFolder, MD5DirNameOld);
-                        MD5DirPathOldMain = Path.Combine(MD5DirPathOld, "Main");
-                        MD5DirPathOldTemp = Path.Combine(MD5DirPathOld, "Temp");
-                        MD5DirNameNew = BitConverter.ToString(MD5CurrentlyLoaded).Replace("-", "").ToLowerInvariant();
-                        MD5DirPathNew = Path.Combine(ProfilesFolder, MD5DirNameNew);
-                        DirectoryCopy(MD5DirPathOld, MD5DirPathNew, true);
-                        if (Directory.Exists(MD5DirPathOldMain) && Directory.Exists(MD5DirPathOldTemp))
-                        {
-                            Directory.Delete(MD5DirPathOldTemp, true);
-                        }
-                        DirectoryCopy(MD5DirPathOldMain, MD5DirPathOldTemp, true);
-                    }
-                    MD5PreviouslyLoaded = MD5CurrentlyLoaded;
-                    // Get the subdirectories for the specified directory.
-                    MD5DirNameOld = BitConverter.ToString(MD5CurrentlyLoaded).Replace("-", "").ToLowerInvariant();
-                    MD5DirPathOld = Path.Combine(ProfilesFolder, MD5DirNameOld);
-                    MD5DirPathOldMain = Path.Combine(MD5DirPathOld, "Main");
-                    MD5DirPathOldTemp = Path.Combine(MD5DirPathOld, "Temp");
-                    if ((Directory.Exists(MD5DirPathOldMain)) && (Directory.Exists(MD5DirPathOldTemp)) && copyProfile)
-                    {
-                        Directory.Delete(MD5DirPathOldMain, true);
-                    }
-                    DirectoryCopy(MD5DirPathOldTemp, MD5DirPathOldMain, true);
+                // The profile saving happens even if profile mode is disabled so data isn't lost.
+                // If there's no profile or it's empty, nothing new is created.
 
-                    ProfileHash = BitConverter.ToString(MD5PreviouslyLoaded).Replace("-", "").ToLowerInvariant();
-                    profDir = Path.Combine(ProfilesFolder, ProfileHash);
-                    Directory.CreateDirectory(profDir);
-                    Directory.CreateDirectory(Path.Combine(profDir, "Main"));
-                    Directory.CreateDirectory(Path.Combine(profDir, "Temp"));
-                }
-                if (SettingsWindow.DeleteOldProfileOnSave && copyProfile)
+                string oldProfile = Path.Join(ProfilesFolder, previousProfileHash);
+                string oldProfileMain = Path.Join(oldProfile, "Main");
+                string oldProfileTemp = Path.Join(oldProfile, "Temp");
+                string newProfile = Path.Join(ProfilesFolder, ProfileHash);
+                string newProfileMain = Path.Join(newProfile, "Main");
+                string newProfileTemp = Path.Join(newProfile, "Temp");
+
+                if (copyProfile)
                 {
-                    Directory.Delete(Path.Combine(ProfilesFolder, deleteIfModeActive), true);
+                    // Copy from where temp files currently are (old temp) to where main files should be (new main)
+                    CopyDirectoryHard(oldProfileTemp, newProfileMain);
+
+                    if (!SettingsWindow.DeleteOldProfileOnSave)
+                    {
+                        // In old profile, delete temp files, since changes weren't saved there
+                        if (Directory.Exists(oldProfileTemp))
+                            Directory.Delete(oldProfileTemp, true);
+                    }
+                    else
+                    {
+                        // Delete old profile entirely.
+                        if (Directory.Exists(oldProfile))
+                            Directory.Delete(oldProfile, true);
+                    }
+
+                    // Copy main to temp so it can be used currently
+                    CopyDirectoryHard(newProfileMain, newProfileTemp);
+                }
+                else
+                {
+                    // Just save temp stuff into main
+                    CopyDirectoryHard(oldProfileTemp, oldProfileMain);
                 }
             }
             catch (Exception exc)
             {
-                this.ShowError("ProfileSaveEvent error! Send this to Grossley#2869 and make an issue on Github\n" + exc);
+                this.ShowError("SaveProfile error! Send this to Grossley#2869 and make an issue on Github\n" + exc);
             }
         }
-        public void DirectoryCopy(string sourceDirName, string destDirName, bool copySubDirs)
+
+        // Copies source directory to destination directory.
+        // If destination already exists, delete it first.
+        // If source doesn't exist or is empty, stop.
+        static void CopyDirectoryHard(string source, string destination)
         {
-            try
+            if (Directory.Exists(destination))
+                Directory.Delete(destination, true);
+
+            var sourceInfo = new DirectoryInfo(source);
+
+            if (!sourceInfo.Exists)
+                return;
+            if (!sourceInfo.EnumerateFileSystemInfos().Any())
+                return;
+
+            Directory.CreateDirectory(destination);
+
+            foreach (FileInfo file in sourceInfo.EnumerateFiles())
             {
-                // Get the subdirectories for the specified directory.
-                DirectoryInfo dir = new DirectoryInfo(sourceDirName);
-
-                if (!dir.Exists)
-                {
-                    throw new DirectoryNotFoundException("Source directory does not exist or could not be found: " + sourceDirName);
-                }
-
-                DirectoryInfo[] dirs = dir.GetDirectories();
-
-                // If the destination directory doesn't exist, create it.
-                Directory.CreateDirectory(destDirName);
-
-                // Get the files in the directory and copy them to the new location.
-                FileInfo[] files = dir.GetFiles();
-                foreach (FileInfo file in files)
-                {
-                    string tempPath = Path.Combine(destDirName, file.Name);
-                    if (!File.Exists(tempPath))
-                    {
-                        try
-                        {
-                            file.CopyTo(tempPath, false);
-                        }
-                        catch (Exception ex)
-                        {
-                            this.ShowError("An exception occurred while processing copying " + tempPath + "\nException: \n" + ex);
-                            return;
-                        }
-                    }
-                }
-
-                // If copying subdirectories, copy them and their contents to new location.
-                if (copySubDirs)
-                {
-                    foreach (DirectoryInfo subdir in dirs)
-                    {
-                        string tempPath = Path.Combine(destDirName, subdir.Name);
-                        DirectoryCopy(subdir.FullName, tempPath, copySubDirs);
-                    }
-                }
+                file.CopyTo(Path.Join(destination, file.Name));
             }
-            catch (Exception exc)
+            foreach (DirectoryInfo dir in sourceInfo.EnumerateDirectories())
             {
-                this.ShowError("DirectoryCopy error! Send this to Grossley#2869 and make an issue on Github\n" + exc);
+                CopyDirectoryHard(dir.FullName, Path.Join(destination, dir.Name));
             }
         }
     }

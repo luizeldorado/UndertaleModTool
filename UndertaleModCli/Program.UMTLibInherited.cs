@@ -1072,9 +1072,7 @@ public partial class Program : IScriptInterface
             else
             {
                 var instructions = Assembler.Assemble(gmlCode, Data);
-                code.Replace(instructions);
-                if (destroyASM)
-                    code.DeleteProfileModeGML(Data);
+                code.SetASM(Data, instructions);
             }
         }
         catch (Exception ex)

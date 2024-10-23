@@ -1773,6 +1773,7 @@ public class UndertaleCode : UndertaleNamedResource, UndertaleObjectWithBlobs, I
             {
                 if (data.ToolInfo.ProfileMode)
                 {
+                    Directory.CreateDirectory(Path.GetDirectoryName(path));
                     File.WriteAllText(path, text);
                 }
                 else
@@ -1794,7 +1795,7 @@ public class UndertaleCode : UndertaleNamedResource, UndertaleObjectWithBlobs, I
 
         // TODO: Invalidate cache?
 
-        // Invalidade profile mode code
+        // Invalidate profile mode code
         string path = GetProfileModeGMLPath(data);
         if (path is not null && File.Exists(path))
             File.Delete(path);

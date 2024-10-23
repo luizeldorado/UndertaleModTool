@@ -185,7 +185,6 @@ namespace UndertaleModTool
         private LoaderDialog scriptDialog;
 
         // Related to profile system and appdata
-        public byte[] MD5PreviouslyLoaded = new byte[16];
         public byte[] MD5CurrentlyLoaded = new byte[16];
         public static string AppDataFolder => Settings.AppDataFolder;
         public static string ProfilesFolder = Path.Join(Settings.AppDataFolder, "Profiles");
@@ -495,7 +494,7 @@ namespace UndertaleModTool
                 }
             }
 
-            CrashCheck();
+            //await CrashCheck();
 
             RunGMSDebuggerItem.Visibility = Settings.Instance.ShowDebuggerOption
                                             ? Visibility.Visible : Visibility.Collapsed;
@@ -649,6 +648,8 @@ namespace UndertaleModTool
             {
                 if (this.ShowQuestion("Warning: you currently have a project open.\nAre you sure you want to make a new project?") == MessageBoxResult.No)
                     return false;
+
+                CloseProfile();
             }
             this.Dispatcher.Invoke(() =>
             {
@@ -660,6 +661,9 @@ namespace UndertaleModTool
             DisposeGameData();
 
             FilePath = null;
+
+            ProfileHash = "Unknown";
+            MD5CurrentlyLoaded = new byte[16];
 
             Data = UndertaleData.CreateNew();
             Data.ToolInfo.ProfileMode = SettingsWindow.ProfileModeEnabled;
@@ -839,7 +843,7 @@ namespace UndertaleModTool
                 }
                 else
                 {
-                    RevertProfile();
+                    CloseProfile();
                 }
 
                 DestroyUMTLastEdited();
@@ -1005,25 +1009,24 @@ namespace UndertaleModTool
 #if DEBUG
                     Debug.WriteLine(e);
 #endif
-                    this.ShowError("An error occured while trying to load:\n" + e.Message, "Load error");
-                }
-
-                if (onlyGeneralInfo)
-                {
-                    Dispatcher.Invoke(() =>
-                    {
-                        dialog.Hide();
-                        Data = data;
-                        FilePath = filename;
-                    });
-
-                    return;
+                    this.ShowError("An error occurred while trying to load:\n" + e.Message, "Load error");
                 }
 
                 Dispatcher.Invoke(async () =>
                 {
                     if (data != null)
                     {
+                        CloseProfile();
+
+                        if (onlyGeneralInfo)
+                        {
+                            Data = data;
+                            FilePath = filename;
+                            return;
+                        }
+
+                        await LoadProfile(data, filename);
+
                         if (data.UnsupportedBytecodeVersion)
                         {
                             this.ShowWarning("Only bytecode versions 13 to 17 are supported for now, you are trying to load " + data.GeneralInfo.BytecodeVersion + ". A lot of code is disabled and will likely break something. Saving/exporting is disabled.", "Unsupported bytecode version");
@@ -1041,8 +1044,6 @@ namespace UndertaleModTool
                             CanSave = true;
                             CanSafelySave = true;
                         }
-
-                        await UpdateProfile(data, filename);
 
                         if (data.IsYYC())
                         {
@@ -1230,7 +1231,7 @@ namespace UndertaleModTool
 
                     Dispatcher.Invoke(() =>
                     {
-                        this.ShowError("An error occured while trying to save:\n" + e.Message, "Save error");
+                        this.ShowError("An error occurred while trying to save:\n" + e.Message, "Save error");
                     });
 
                     SaveSucceeded = false;
@@ -1250,8 +1251,7 @@ namespace UndertaleModTool
                         await SaveGMLCache(filename, true, dialog, isDifferentPath);
 
                         // Also make the changes to the profile system.
-                        await ProfileSaveEvent(Data, filename);
-                        SaveTempToMainProfile();
+                        await SaveProfile(Data, filename);
                     }
                     else
                     {
@@ -1266,7 +1266,7 @@ namespace UndertaleModTool
                 {
                     Dispatcher.Invoke(() =>
                     {
-                        this.ShowError("An error occured while trying to save:\n" + exc.Message, "Save error");
+                        this.ShowError("An error occurred while trying to save:\n" + exc.Message, "Save error");
                     });
 
                     SaveSucceeded = false;
@@ -1985,7 +1985,7 @@ namespace UndertaleModTool
             }
             catch (Exception ex)
             {
-                this.ShowError("An error occured in the object references related window.\n" +
+                this.ShowError("An error occurred in the object references related window.\n" +
                                $"Please report this on GitHub.\n\n{ex}");
             }
             finally
@@ -2030,7 +2030,7 @@ namespace UndertaleModTool
             }
             catch (Exception ex)
             {
-                this.ShowError("An error occured in the object references related window.\n" +
+                this.ShowError("An error occurred in the object references related window.\n" +
                                $"Please report this on GitHub.\n\n{ex}");
             }
             finally
@@ -2640,7 +2640,7 @@ namespace UndertaleModTool
                 if (exTypesDict is not null)
                 {
                     string exTypesStr = string.Join(",\n", exTypesDict.Select(x => $"{x.Key}{((x.Value > 1) ? " (x" + x.Value + ")" : string.Empty)}"));
-                    excText = $"{exc.GetType().FullName}: One on more errors occured:\n{exTypesStr}\n\nThe current stacktrace:\n{excLines}";
+                    excText = $"{exc.GetType().FullName}: One on more errors occurred:\n{exTypesStr}\n\nThe current stacktrace:\n{excLines}";
                 }
                 else
                 {
@@ -2869,7 +2869,7 @@ namespace UndertaleModTool
 
             if (!dlgResult.HasValue || dlgResult == false)
             {
-                // returns null (not an empty!!!) string if the dialog has been closed, or an error has occured.
+                // returns null (not an empty!!!) string if the dialog has been closed, or an error has occurred.
                 return null;
             }
 
@@ -3619,7 +3619,7 @@ result in loss of work.");
                         }
                         catch (Exception ex)
                         {
-                            this.ShowError("An error occured while trying to load:\n" + ex.Message, "Load error");
+                            this.ShowError("An error occurred while trying to load:\n" + ex.Message, "Load error");
                         }
 
                         Dispatcher.Invoke(() =>

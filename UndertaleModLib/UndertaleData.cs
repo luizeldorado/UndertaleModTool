@@ -344,8 +344,6 @@ namespace UndertaleModLib
         /// </summary>
         public GameSpecificRegistry GameSpecificRegistry;
 
-        //Profile mode related properties
-
         //TODO: Why are the functions that deal with the cache in a completely different place than the cache parameters? These have *no* place of being here.
         /// <summary>
         /// A <see cref="Dictionary{TKey,TValue}"/> of cached decompiled code,
@@ -422,7 +420,7 @@ namespace UndertaleModLib
         }
 
         /// <summary>
-        /// Reports the zero-based index of the first occurence of the specified <see cref="UndertaleResource"/>.
+        /// Reports the zero-based index of the first occurrence of the specified <see cref="UndertaleResource"/>.
         /// </summary>
         /// <param name="obj">The object to get the index of.</param>
         /// <param name="panicIfInvalid">Whether to throw if <paramref name="obj"/> is not a valid object.</param>
