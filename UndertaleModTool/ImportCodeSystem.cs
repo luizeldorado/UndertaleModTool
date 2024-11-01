@@ -383,7 +383,7 @@ namespace UndertaleModTool
                 else
                 {
                     var instructions = Assembler.Assemble(gmlCode, Data);
-                    code.SetASM(Data, instructions);
+                    code.SetInstructions(Data, instructions);
                 }
             }
             catch (Exception ex)

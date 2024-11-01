@@ -760,11 +760,8 @@ namespace UndertaleModTool
 
                             RestoreCaretPosition(DecompiledEditor, currLine, currColumn, scrollPos);
 
-                            if (existingDialog is not null)                      //if code was edited (and compiles after it)
+                            if (existingDialog is not null) //if code was edited (and compiles after it)
                             {
-                                data.GMLCacheChanged.Add(code.Name.Content);
-                                data.GMLCacheFailed?.Remove(code.Name.Content); //remove that code name, since that code compiles now
-
                                 openSaveDialog = mainWindow.IsSaving;
                             }
                         }
@@ -925,8 +922,6 @@ namespace UndertaleModTool
 
             // Decompile new code
             await DecompileCode(code, false, dialog);
-
-            //GMLCacheChanged.Add() is inside DecompileCode()
         }
         private void DecompiledEditor_LostFocus(object sender, RoutedEventArgs e)
         {
@@ -980,7 +975,7 @@ namespace UndertaleModTool
             try
             {
                 var instructions = Assembler.Assemble(DisassemblyEditor.Text, data);
-                code.SetASM(data, instructions);
+                code.SetInstructions(data, instructions);
             }
             catch (Exception ex)
             {
@@ -1001,8 +996,6 @@ namespace UndertaleModTool
 
             if (!DisassemblyEditor.IsReadOnly)
             {
-                data.GMLCacheChanged.Add(code.Name.Content);
-
                 if (mainWindow.IsSaving)
                 {
                     mainWindow.IsSaving = false;

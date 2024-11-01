@@ -115,7 +115,7 @@ void DumpCode()
                         //ScriptMessage("4 " + x);
                         //Console.WriteLine(x);
                     }
-                    code_orig.Replace(Assembler.Assemble(x, Data));
+                    code_orig.SetInstructions(Data, Assembler.Assemble(x, Data));
                 }
                 string str_path_to_use = Path.Combine(codeFolder, code_orig.Name.Content + ".asm");
                 string code_output = "";

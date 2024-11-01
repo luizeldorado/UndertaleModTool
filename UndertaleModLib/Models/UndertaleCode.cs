@@ -1639,11 +1639,8 @@ public class UndertaleCode : UndertaleNamedResource, UndertaleObjectWithBlobs, I
     /// Replaces <b>all</b> instructions currently existing in this code entry with another set of instructions.
     /// </summary>
     /// <param name="instructions">The new instructions for this code entry.</param>
-    public void Replace(IList<UndertaleInstruction> instructions)
+    private void Replace(IList<UndertaleInstruction> instructions)
     {
-        if (ParentEntry is not null)
-            return;
-
         Instructions.Clear();
         Instructions.AddRange(instructions);
         UpdateAddresses();
@@ -1717,8 +1714,6 @@ public class UndertaleCode : UndertaleNamedResource, UndertaleObjectWithBlobs, I
         if (text != null)
             return text;
 
-        // TODO: Check if it's in cache
-
         // Decompile
         return GetDecompiledGML(data, globalDecompileContext, decompileSettings);
     }
@@ -1764,9 +1759,6 @@ public class UndertaleCode : UndertaleNamedResource, UndertaleObjectWithBlobs, I
         {
             Replace(compileContext.ResultAssembly);
 
-            // TODO: Check this
-            data.GMLCacheChanged.Add(Name.Content);
-
             // Set profile mode code
             string path = GetProfileModeGMLPath(data);
             if (path is not null)
@@ -1787,13 +1779,11 @@ public class UndertaleCode : UndertaleNamedResource, UndertaleObjectWithBlobs, I
         return compileContext;
     }
 
-    public void SetASM(UndertaleData data, IList<UndertaleInstruction> instructions)
+    public void SetInstructions(UndertaleData data, IList<UndertaleInstruction> instructions)
     {
         if (ParentEntry is not null) return;
 
         Replace(instructions);
-
-        // TODO: Invalidate cache?
 
         // Invalidate profile mode code
         string path = GetProfileModeGMLPath(data);

@@ -68,7 +68,7 @@ namespace UndertaleModTool
         {
             try
             {
-                File.WriteAllText(Path.Combine(ProfilesFolder, "LastEdited.txt"), ProfileHash + "\n" + filename);
+                File.WriteAllText(Path.Combine(ProfilesFolder, "LastEdited.txt"), Data.ToolInfo.CurrentMD5 + "\n" + filename);
             }
             catch (Exception exc)
             {
@@ -90,28 +90,9 @@ namespace UndertaleModTool
             }
         }
 
-        /// <summary>
-        /// Calculates the profile hash, setting MD5CurrentlyLoaded and ProfileHash. Returns the previous profile hash.
-        /// </summary>
-        async Task<string> CalculateProfileHash(string filename)
-        {
-            return await Task.Run(() =>
-            {
-                string previousProfileHash = ProfileHash;
-
-                using var md5Instance = MD5.Create();
-                using var stream = File.OpenRead(filename);
-                MD5CurrentlyLoaded = md5Instance.ComputeHash(stream);
-                ProfileHash = BitConverter.ToString(MD5CurrentlyLoaded).Replace("-", "").ToLowerInvariant();
-
-                return previousProfileHash;
-            });
-        }
-
         public void CloseProfile()
         {
-            string profile = Path.Join(ProfilesFolder, ProfileHash);
-            string profileMain = Path.Join(profile, "Main");
+            string profile = Path.Join(ProfilesFolder, Data.ToolInfo.CurrentMD5);
             string profileTemp = Path.Join(profile, "Temp");
 
             // Delete temp to not waste space.
@@ -119,15 +100,18 @@ namespace UndertaleModTool
                 Directory.Delete(profileTemp, true);
         }
 
-        public async Task LoadProfile(UndertaleData data, string filename)
+        public async Task LoadProfile(string filename)
         {
             FileMessageEvent?.Invoke("Calculating MD5 hash...");
 
             try
             {
-                await CalculateProfileHash(filename);
+                await Task.Run(() =>
+                {
+                    Data.ToolInfo.CurrentMD5 = GenerateMD5(filename);
+                });
 
-                string profile = Path.Join(ProfilesFolder, ProfileHash);
+                string profile = Path.Join(ProfilesFolder, Data.ToolInfo.CurrentMD5);
                 string profileMain = Path.Join(profile, "Main");
                 string profileTemp = Path.Join(profile, "Temp");
 
@@ -179,22 +163,28 @@ an issue on GitHub.");
                 this.ShowError("LoadProfile error! Send this to Grossley#2869 and make an issue on Github\n" + exc);
             }
         }
-        public async Task SaveProfile(UndertaleData data, string filename)
+        public async Task SaveProfile(string filename)
         {
             FileMessageEvent?.Invoke("Calculating MD5 hash...");
 
             try
             {
-                string previousProfileHash = await CalculateProfileHash(filename);
-                bool copyProfile = (previousProfileHash != ProfileHash);
+                string previousMD5 = Data.ToolInfo.CurrentMD5;
+
+                await Task.Run(() =>
+                {
+                    Data.ToolInfo.CurrentMD5 = GenerateMD5(filename);
+                });
+
+                bool copyProfile = (previousMD5 != Data.ToolInfo.CurrentMD5);
 
                 // The profile saving happens even if profile mode is disabled so data isn't lost.
                 // If there's no profile or it's empty, nothing new is created.
 
-                string oldProfile = Path.Join(ProfilesFolder, previousProfileHash);
+                string oldProfile = Path.Join(ProfilesFolder, previousMD5);
                 string oldProfileMain = Path.Join(oldProfile, "Main");
                 string oldProfileTemp = Path.Join(oldProfile, "Temp");
-                string newProfile = Path.Join(ProfilesFolder, ProfileHash);
+                string newProfile = Path.Join(ProfilesFolder, Data.ToolInfo.CurrentMD5);
                 string newProfileMain = Path.Join(newProfile, "Main");
                 string newProfileTemp = Path.Join(newProfile, "Temp");
 

@@ -55,9 +55,6 @@ public partial class Program : IScriptInterface
     public string ScriptErrorType { get; set; }
 
     /// <inheritdoc/>
-    public bool GMLCacheEnabled => false; //TODO: not implemented yet, due to no code editing
-
-    /// <inheritdoc/>
     public bool IsAppClosed { get; set; }
 
     #endregion
@@ -291,16 +288,6 @@ public partial class Program : IScriptInterface
     public void ReapplyProfileCode()
     {
         //CLI does not have any code editing tools (yet), nor a profile Mode thus since is completely useless
-    }
-
-    /// <inheritdoc/>
-    public async Task<bool> GenerateGMLCache(GlobalDecompileContext decompileContext = null, object dialog = null, bool isSaving = false)
-    {
-        await Task.Delay(1); //dummy await
-
-        //TODO: not implemented yet, due to no code editing / profile mode.
-
-        return false;
     }
 
     /// <inheritdoc/>
@@ -1072,7 +1059,7 @@ public partial class Program : IScriptInterface
             else
             {
                 var instructions = Assembler.Assemble(gmlCode, Data);
-                code.SetASM(Data, instructions);
+                code.SetInstructions(Data, instructions);
             }
         }
         catch (Exception ex)

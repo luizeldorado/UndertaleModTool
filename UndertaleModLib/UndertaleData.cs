@@ -182,8 +182,6 @@ namespace UndertaleModLib
         /// The rooms of the data file.
         /// </summary>
         public IList<UndertaleRoom> Rooms => FORM.ROOM?.List;
-        //[Obsolete("Unused")]
-        // DataFile
 
         /// <summary>
         /// The texture page items from the data file.
@@ -303,6 +301,10 @@ namespace UndertaleModLib
         /// </summary>
         public IList<UndertaleParticleSystemEmitter> ParticleSystemEmitters => FORM.PSEM?.List;
 
+        /// <summary>
+        /// Some info for the editor to store data on.
+        /// </summary>
+        public readonly ToolInfo ToolInfo = new ToolInfo();
 
         /// <summary>
         /// Whether this is an unsupported bytecode version.
@@ -318,11 +320,6 @@ namespace UndertaleModLib
         /// Whether the data file has short circuiting enabled.
         /// </summary>
         public bool ShortCircuit = true;
-
-        /// <summary>
-        /// Some info for the editor to store data on.
-        /// </summary>
-        public readonly ToolInfo ToolInfo = new ToolInfo();
 
         /// <summary>
         /// Shows the current padding value. <c>-1</c> indicates a pre 1.4.9999 padding, where the default is 16.
@@ -343,39 +340,6 @@ namespace UndertaleModLib
         /// Registry for macro types, their resolvers, and other data specific to this game.
         /// </summary>
         public GameSpecificRegistry GameSpecificRegistry;
-
-        //TODO: Why are the functions that deal with the cache in a completely different place than the cache parameters? These have *no* place of being here.
-        /// <summary>
-        /// A <see cref="Dictionary{TKey,TValue}"/> of cached decompiled code,
-        /// with the code name as the Key and the decompiled code text as the value.
-        /// </summary>
-        public ConcurrentDictionary<string, string> GMLCache { get; set; }
-
-        /// <summary>
-        /// A list of names of code entries which failed to compile or decompile.
-        /// </summary>
-        public List<string> GMLCacheFailed { get; set; }
-
-        /// <summary>
-        /// A list of names of modified code entries.
-        /// </summary>
-        public ConcurrentBag<string> GMLCacheChanged { get; set; } = new();
-
-        /// <summary>
-        /// A list of names of code entries that were edited before the "Use decompiled code cache" setting was enabled.
-        /// </summary>
-        public List<string> GMLEditedBefore { get; set; }
-
-        /// <summary>
-        /// Whether the decompiled code cache has been saved to disk with no new cache changes happening since then.
-        /// </summary>
-        public bool GMLCacheWasSaved { get; set; }
-
-        /// <summary>
-        /// Whether the decompiled code cache is generated. This will be <see langword="false"/> if it's currently generating and
-        /// <see langword="true"/> otherwise.
-        /// </summary>
-        public bool GMLCacheIsReady { get; set; } = true;
 
         /// <summary>
         /// An array of a <see cref="UndertaleData"/> properties with <see cref="IList{T}"/> as their type.
@@ -455,7 +419,6 @@ namespace UndertaleModLib
         {
             return IsVersionAtLeast(2);
         }
-
 
         // Old Versions: https://store.yoyogames.com/downloads/gm-studio/release-notes-studio-old.html
         // https://web.archive.org/web/20150304025626/https://store.yoyogames.com/downloads/gm-studio/release-notes-studio.html
@@ -698,10 +661,6 @@ namespace UndertaleModLib
             FORM = null;
             GlobalFunctions = null;
             GameSpecificRegistry = null;
-            GMLCache = null;
-            GMLCacheFailed = null;
-            GMLCacheChanged = new();
-            GMLEditedBefore = null;
         }
     }
 

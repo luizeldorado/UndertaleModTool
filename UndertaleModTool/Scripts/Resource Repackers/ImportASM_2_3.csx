@@ -187,7 +187,7 @@ await Task.Run(() => {
                         try
                         {
                             var instructions = Assembler.Assemble(asmCode, Data);
-                            code.Replace(instructions);
+                            code.SetInstructions(Data, instructions);
                         }
                         catch (Exception ex)
                         {
@@ -237,7 +237,7 @@ await Task.Run(() => {
             try
             {
                 var instructions = Assembler.Assemble(asmCode, Data);
-                code.Replace(instructions);
+                code.SetInstructions(Data, instructions);
             }
             catch (Exception ex)
             {
