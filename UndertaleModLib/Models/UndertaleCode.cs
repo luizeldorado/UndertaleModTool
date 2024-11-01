@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using Underanalyzer;
+using Underanalyzer.Decompiler;
 using UndertaleModLib.Compiler;
 using UndertaleModLib.Decompiler;
 using UndertaleModLib.Util;
@@ -1635,29 +1636,14 @@ public class UndertaleCode : UndertaleNamedResource, UndertaleObjectWithBlobs, I
     }
 
     /// <summary>
-    /// Append instructions at the end of this code entry.
-    /// </summary>
-    /// <param name="instructions">The instructions to append.</param>
-    public void Append(IList<UndertaleInstruction> instructions)
-    {
-        if (ParentEntry is not null)
-            return;
-
-        Instructions.AddRange(instructions);
-        UpdateAddresses();
-    }
-
-    /// <summary>
     /// Replaces <b>all</b> instructions currently existing in this code entry with another set of instructions.
     /// </summary>
     /// <param name="instructions">The new instructions for this code entry.</param>
-    public void Replace(IList<UndertaleInstruction> instructions)
+    private void Replace(IList<UndertaleInstruction> instructions)
     {
-        if (ParentEntry is not null)
-            return;
-
         Instructions.Clear();
-        Append(instructions);
+        Instructions.AddRange(instructions);
+        UpdateAddresses();
     }
 
     /// <summary>
@@ -1668,33 +1654,26 @@ public class UndertaleCode : UndertaleNamedResource, UndertaleObjectWithBlobs, I
     /// <exception cref="Exception"> if the GML code does not compile or if there's an error writing the code to the profile entry.</exception>
     public void AppendGML(string gmlCode, UndertaleData data)
     {
-        if (ParentEntry is not null)
-            return;
-
-        CompileContext context = Compiler.Compiler.CompileGMLText(gmlCode, data, this);
-        if (!context.SuccessfulCompile || context.HasError)
-        {
-            Console.WriteLine(gmlCode);
-            throw new Exception("GML Compile Error: " + context.ResultError);
-        }
-
-        Append(context.ResultAssembly);
-
-        data.GMLCacheChanged?.Add(Name?.Content);
-
         try
         {
-            // Attempt to write text in all modes, because this is a special case.
-            string tempPath = Path.Combine(data.ToolInfo.AppDataProfiles, data.ToolInfo.CurrentMD5, "Temp", Name?.Content + ".gml");
-            if (File.Exists(tempPath))
+            string oldGmlCode = GetGML(data);
+            if (oldGmlCode is null)
+                return;
+
+            CompileContext context = SetGML(data, oldGmlCode + "\n" + gmlCode);
+
+            if (context is null)
+                return;
+
+            if (!context.SuccessfulCompile || context.HasError)
             {
-                string readText = File.ReadAllText(tempPath) + "\n" + gmlCode;
-                File.WriteAllText(tempPath, readText);
+                Console.WriteLine(gmlCode);
+                throw new Exception("GML Compile Error: " + context.ResultError);
             }
         }
-        catch (Exception exc)
+        catch (DecompilerException e)
         {
-            throw new Exception("Error during writing of GML code to profile:\n" + exc);
+            throw new Exception("GML Decompile Error: " + e.Message);
         }
     }
 
@@ -1706,32 +1685,123 @@ public class UndertaleCode : UndertaleNamedResource, UndertaleObjectWithBlobs, I
     /// <exception cref="Exception">If the GML code does not compile or if there's an error writing the code to the profile entry.</exception>
     public void ReplaceGML(string gmlCode, UndertaleData data)
     {
-        if (ParentEntry is not null)
+        CompileContext context = SetGML(data, gmlCode);
+        if (context is null)
             return;
 
-        CompileContext context = Compiler.Compiler.CompileGMLText(gmlCode, data, this);
         if (!context.SuccessfulCompile || context.HasError)
         {
             Console.WriteLine(gmlCode);
             throw new Exception("GML Compile Error: " + context.ResultError);
         }
+    }
 
-        Replace(context.ResultAssembly);
+    /// <summary>
+    /// Gets the GML code associated with this code entry.
+    /// </summary>
+    /// <exception cref="DecompilerException"></exception>
+    /// <remarks>
+    /// If profile mode is enabled and the related file exists, that code is returned.
+    /// Otherwise, the code is decompiled and returned.
+    /// </remarks>
+    /// <returns>The GML code, or null if it has parent entry.</returns>
+    public string GetGML(UndertaleData data, GlobalDecompileContext globalDecompileContext = null, IDecompileSettings decompileSettings = null)
+    {
+        if (ParentEntry is not null) return null;
 
-        data.GMLCacheChanged?.Add(Name?.Content);
+        // Check if it's in profile mode
+        string text = GetProfileModeGML(data);
+        if (text != null)
+            return text;
 
-        //TODO: only do this if profile mode is enabled in the first place
-        try
+        // Decompile
+        return GetDecompiledGML(data, globalDecompileContext, decompileSettings);
+    }
+
+    public string GetDecompiledGML(UndertaleData data, GlobalDecompileContext globalDecompileContext = null, IDecompileSettings decompileSettings = null)
+    {
+        globalDecompileContext ??= new(data);
+        decompileSettings ??= data.ToolInfo.DecompilerSettings;
+        return new DecompileContext(globalDecompileContext, this, decompileSettings).DecompileToString();
+    }
+
+    /// <summary>
+    /// Gets the profile mode GML of this code entry. If profile mode is disabled or the related file doesn't exist, null is returned.
+    /// </summary>
+    /// <returns></returns>
+    public string GetProfileModeGML(UndertaleData data)
+    {
+        if (data.ToolInfo.ProfileMode)
         {
-            // When necessary, write to profile.
-            string tempPath = Path.Combine(data.ToolInfo.AppDataProfiles, data.ToolInfo.CurrentMD5, "Temp", Name?.Content + ".gml");
-            if (data.ToolInfo.ProfileMode || File.Exists(tempPath))
-                File.WriteAllText(tempPath, gmlCode);
+            string path = GetProfileModeGMLPath(data);
+            if (path is not null && File.Exists(path))
+                return File.ReadAllText(path);
         }
-        catch (Exception exc)
+        return null;
+    }
+
+    /// <summary>
+    /// Sets the GML code of this code entry.
+    /// Sets GML of an UndertaleCode to text by compiling it.
+    /// </summary>
+    /// <remarks><paramref name="text"/> is compiled and, if successful, the assembly is set in this instance. If profile mode is enabled, it also updates the related GML file. If it's disabled, it will remove the file.</remarks>
+    /// <returns>A <see cref="CompileContext"/>, which has the properties SuccessfulCompile, HasError and ResultError for error checking, or null if it has a parent entry.</returns>
+    public CompileContext SetGML(UndertaleData data, string text, Compiler.Compiler.MainThreadDelegate mainThreadDelegate = null)
+    {
+        if (ParentEntry is not null) return null;
+
+        // Compile
+        CompileContext compileContext = mainThreadDelegate is null
+            ? Compiler.Compiler.CompileGMLText(text, data, this)
+            : Compiler.Compiler.CompileGMLText(text, data, this, mainThreadDelegate);
+
+        if (compileContext.SuccessfulCompile)
         {
-            throw new Exception("Error during writing of GML code to profile:\n" + exc);
+            Replace(compileContext.ResultAssembly);
+
+            // Set profile mode code
+            string path = GetProfileModeGMLPath(data);
+            if (path is not null)
+            {
+                if (data.ToolInfo.ProfileMode)
+                {
+                    Directory.CreateDirectory(Path.GetDirectoryName(path));
+                    File.WriteAllText(path, text);
+                }
+                else
+                {
+                    if (File.Exists(path))
+                        File.Delete(path);
+                }
+            }
         }
+
+        return compileContext;
+    }
+
+    public void SetInstructions(UndertaleData data, IList<UndertaleInstruction> instructions)
+    {
+        if (ParentEntry is not null) return;
+
+        Replace(instructions);
+
+        // Invalidate profile mode code
+        string path = GetProfileModeGMLPath(data);
+        if (path is not null && File.Exists(path))
+            File.Delete(path);
+    }
+
+    string GetProfileModeGMLPath(UndertaleData data)
+    {
+        if (data.ToolInfo.AppDataProfiles is null) return null;
+        return Path.Join(data.ToolInfo.AppDataProfiles, data.ToolInfo.CurrentMD5, "Temp", Name.Content + ".gml");
+    }
+
+    public void DeleteProfileModeGML(UndertaleData data)
+    {
+        string path = GetProfileModeGMLPath(data);
+        if (path is not null && File.Exists(path))
+            File.Delete(path);
     }
 
     /// <inheritdoc />
