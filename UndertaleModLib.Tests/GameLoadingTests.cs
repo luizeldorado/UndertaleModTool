@@ -1,5 +1,4 @@
-﻿using Underanalyzer.Decompiler;
-using UndertaleModLib.Decompiler;
+﻿using UndertaleModLib.Decompiler;
 using UndertaleModLib.Models;
 
 namespace UndertaleModLib.Tests

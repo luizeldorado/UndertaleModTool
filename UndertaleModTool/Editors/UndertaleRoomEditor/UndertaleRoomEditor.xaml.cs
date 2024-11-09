@@ -117,7 +117,7 @@ namespace UndertaleModTool
             visualOffProp.SetValue(roomCanvas, new Vector(0, 0));
             Brush gridOpacMask = roomCanvas.OpacityMask;
             roomCanvas.OpacityMask = null;
-            
+
             RenderTargetBitmap target = new((int)roomCanvas.RenderSize.Width, (int)roomCanvas.RenderSize.Height, 96, 96, PixelFormats.Pbgra32);
 
             target.Render(roomCanvas);

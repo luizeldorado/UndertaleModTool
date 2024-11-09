@@ -550,7 +550,7 @@ namespace UndertaleModTool
         {
             gettext = new Dictionary<string, string>();
             string[] decompilationOutput;
-            
+
             decompilationOutput = gettextCode.GetGML(data).Replace("\r\n", "\n").Split('\n');
 
             Regex textdataRegex = new Regex("^ds_map_add\\(global\\.text_data_en, \\\"(.*)\\\", \\\"(.*)\\\"\\)", RegexOptions.Compiled);
@@ -659,7 +659,7 @@ namespace UndertaleModTool
                     if (!File.Exists(gettextJsonPath))
                         gettextJsonPath = Path.Combine(dataPath, "lang", "lang_en_ch1.json");
                 }
-                
+
                 var data = mainWindow.Data;
                 Task t = Task.Run(() =>
                 {
