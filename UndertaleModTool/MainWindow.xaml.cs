@@ -1024,7 +1024,7 @@ namespace UndertaleModTool
                         //Data.ToolInfo.CurrentMD5 = null;
                         Data.ToolInfo.DecompilerSettings = SettingsWindow.DecompilerSettings;
                         Data.ToolInfo.InstanceIdPrefix = () => SettingsWindow.InstanceIdPrefix;
-                        
+
                         await LoadProfile(filename);
 
                         if (data.UnsupportedBytecodeVersion)
