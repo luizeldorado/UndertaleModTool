@@ -10,13 +10,13 @@ Changes from upstream/master (caf04126):
 
 - new-search: 5f4913a5~..1eeddad5 a41e7499 68103f4e a77b62f6
 
-- cleanup-old-stuff: 33bc15bf~..7c6f354c 8078d65e b733cc59~..b5cc1be5 1402b491~..cb919290
+- cleanup-old-stuff: 33bc15bf~..7c6f354c 8078d65e b733cc59~..b5cc1be5 1402b491~..cb919290 d2589b58
 
 - dds-support: 598d0c1d~..a0df1dfe
 
-- replace-webclient (thank you colinator27): 8078d65e
+- replace-webclient (thank you colinator27!): 8078d65e
 
-- texture-handling-rewrite (thank you colinator27): c4b8b805~..9aef94cc
+- texture-handling-rewrite (thank you colinator27!): c4b8b805~..9aef94cc
 
 - magick-14: d89b1ec0~..c3c80d57
 
@@ -27,3 +27,5 @@ Changes from upstream/master (caf04126):
 - profile-mode-revamp: 9b28306a~..73ae02e2
 
 - fix-2024-6-masks: 05b4961b
+
+- tile-editor (thank you CST1229!): 2acabb30~..181f6018
