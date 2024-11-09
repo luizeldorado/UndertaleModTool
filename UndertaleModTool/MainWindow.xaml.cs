@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
@@ -12,12 +11,14 @@ using System.IO.Pipes;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Net.Http.Json;
 using System.Reflection;
 using System.Runtime;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Text;
+using System.Text.Json.Nodes;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
@@ -34,8 +35,6 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Scripting;
 using Microsoft.CodeAnalysis.Scripting;
 using Microsoft.Win32;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using Ookii.Dialogs.Wpf;
 using UndertaleModLib;
 using UndertaleModLib.Decompiler;
@@ -44,7 +43,6 @@ using UndertaleModLib.ModelsDebug;
 using UndertaleModLib.Scripting;
 using UndertaleModLib.Util;
 using UndertaleModTool.Windows;
-using SystemJson = System.Text.Json;
 
 namespace UndertaleModTool
 {
@@ -135,8 +133,6 @@ namespace UndertaleModTool
         private HashSet<string> syncBindings = new();
         private bool _roomRendererEnabled;
 
-        public bool GMLCacheEnabled => SettingsWindow.UseGMLCache;
-
         public bool RoomRendererEnabled
         {
             get => _roomRendererEnabled;
@@ -185,11 +181,8 @@ namespace UndertaleModTool
         private LoaderDialog scriptDialog;
 
         // Related to profile system and appdata
-        public byte[] MD5PreviouslyLoaded = new byte[13];
-        public byte[] MD5CurrentlyLoaded = new byte[15];
         public static string AppDataFolder => Settings.AppDataFolder;
-        public static string ProfilesFolder = Path.Combine(Settings.AppDataFolder, "Profiles");
-        public string ProfileHash = "Unknown";
+        public static string ProfilesFolder = Path.Join(Settings.AppDataFolder, "Profiles");
         public bool CrashedWhileEditing = false;
 
         // Scripting interface-related
@@ -246,7 +239,6 @@ namespace UndertaleModTool
                                             "System.Text.RegularExpressions")
                                 .AddReferences(typeof(UndertaleObject).GetTypeInfo().Assembly,
                                                 GetType().GetTypeInfo().Assembly,
-                                                typeof(JsonConvert).GetTypeInfo().Assembly,
                                                 typeof(System.Text.RegularExpressions.Regex).GetTypeInfo().Assembly,
                                                 typeof(ImageMagick.MagickImage).GetTypeInfo().Assembly,
                                                 typeof(Underanalyzer.Decompiler.DecompileContext).Assembly)
@@ -496,7 +488,7 @@ namespace UndertaleModTool
                 }
             }
 
-            CrashCheck();
+            //await CrashCheck();
 
             RunGMSDebuggerItem.Visibility = Settings.Instance.ShowDebuggerOption
                                             ? Visibility.Visible : Visibility.Collapsed;
@@ -650,21 +642,25 @@ namespace UndertaleModTool
             {
                 if (this.ShowQuestion("Warning: you currently have a project open.\nAre you sure you want to make a new project?") == MessageBoxResult.No)
                     return false;
+
+                CloseProfile();
             }
             this.Dispatcher.Invoke(() =>
             {
                 CommandBox.Text = "";
             });
 
-            await SaveGMLCache(FilePath, false);
-
             DisposeGameData();
 
             FilePath = null;
+
             Data = UndertaleData.CreateNew();
+            Data.ToolInfo.ProfileMode = SettingsWindow.ProfileModeEnabled;
             Data.ToolInfo.AppDataProfiles = ProfilesFolder;
+            //Data.ToolInfo.CurrentMD5 = "Unknown";
             Data.ToolInfo.DecompilerSettings = SettingsWindow.DecompilerSettings;
             Data.ToolInfo.InstanceIdPrefix = () => SettingsWindow.InstanceIdPrefix;
+
             CloseChildFiles();
             OnPropertyChanged("Data");
             OnPropertyChanged("FilePath");
@@ -836,13 +832,10 @@ namespace UndertaleModTool
                 }
                 else
                 {
-                    RevertProfile();
+                    CloseProfile();
                 }
 
                 DestroyUMTLastEdited();
-
-                if (SettingsWindow.UseGMLCache && Data?.GMLCache?.Count > 0 && !Data.GMLCacheWasSaved && Data.GMLCacheIsReady && this.ShowQuestion("Save unedited code cache?") == MessageBoxResult.Yes)
-                    await SaveGMLCache(FilePath, save);
 
                 CloseOtherWindows();
 
@@ -969,6 +962,9 @@ namespace UndertaleModTool
             });
             dialog.Owner = this;
 
+            if (Data is not null)
+                CloseProfile();
+
             DisposeGameData();
             Highlighted = new DescriptionView("Welcome to UndertaleModTool!", "Double click on the items on the left to view them!");
             OpenInTab(Highlighted);
@@ -1002,25 +998,35 @@ namespace UndertaleModTool
 #if DEBUG
                     Debug.WriteLine(e);
 #endif
-                    this.ShowError("An error occured while trying to load:\n" + e.Message, "Load error");
-                }
-
-                if (onlyGeneralInfo)
-                {
-                    Dispatcher.Invoke(() =>
-                    {
-                        dialog.Hide();
-                        Data = data;
-                        FilePath = filename;
-                    });
-
-                    return;
+                    this.ShowError("An error occurred while trying to load:\n" + e.Message, "Load error");
                 }
 
                 Dispatcher.Invoke(async () =>
                 {
                     if (data != null)
                     {
+                        if (Path.GetDirectoryName(FilePath) != Path.GetDirectoryName(filename))
+                            CloseChildFiles();
+
+                        if (onlyGeneralInfo)
+                        {
+                            Data = data;
+                            FilePath = filename;
+                            dialog.Hide();
+                            return;
+                        }
+
+                        Data = data;
+                        FilePath = filename;
+
+                        Data.ToolInfo.ProfileMode = SettingsWindow.ProfileModeEnabled;
+                        Data.ToolInfo.AppDataProfiles = ProfilesFolder;
+                        //Data.ToolInfo.CurrentMD5 = null;
+                        Data.ToolInfo.DecompilerSettings = SettingsWindow.DecompilerSettings;
+                        Data.ToolInfo.InstanceIdPrefix = () => SettingsWindow.InstanceIdPrefix;
+                        
+                        await LoadProfile(filename);
+
                         if (data.UnsupportedBytecodeVersion)
                         {
                             this.ShowWarning("Only bytecode versions 13 to 17 are supported for now, you are trying to load " + data.GeneralInfo.BytecodeVersion + ". A lot of code is disabled and will likely break something. Saving/exporting is disabled.", "Unsupported bytecode version");
@@ -1037,15 +1043,8 @@ namespace UndertaleModTool
                         {
                             CanSave = true;
                             CanSafelySave = true;
-                            await UpdateProfile(data, filename);
-                            if (data != null)
-                            {
-                                data.ToolInfo.ProfileMode = SettingsWindow.ProfileModeEnabled;
-                                data.ToolInfo.DecompilerSettings = SettingsWindow.DecompilerSettings;
-                                data.ToolInfo.InstanceIdPrefix = () => SettingsWindow.InstanceIdPrefix;
-                                data.ToolInfo.CurrentMD5 = BitConverter.ToString(MD5CurrentlyLoaded).Replace("-", "").ToLowerInvariant();
-                            }
                         }
+
                         if (data.IsYYC())
                         {
                             this.ShowWarning("This game uses YYC (YoYo Compiler), which means the code is embedded into the game executable. This configuration is currently not fully supported; continue at your own risk.", "YYC");
@@ -1057,22 +1056,10 @@ namespace UndertaleModTool
                                 this.ShowWarning("This game is set to run with the GameMaker Studio debugger and the normal runtime will simply hang after loading if the debugger is not running. You can turn this off in General Info by checking the \"Disable Debugger\" box and saving.", "GMS Debugger");
                             }
                         }
-                        if (Path.GetDirectoryName(FilePath) != Path.GetDirectoryName(filename))
-                            CloseChildFiles();
 
-                        if (FilePath != filename)
-                            await SaveGMLCache(FilePath, false, dialog);
-
-                        Data = data;
-
-                        await LoadGMLCache(filename, dialog);
                         UndertaleCachedImageLoader.Reset();
                         CachedTileDataLoader.Reset();
 
-                        Data.ToolInfo.AppDataProfiles = ProfilesFolder;
-                        Data.ToolInfo.DecompilerSettings = SettingsWindow.DecompilerSettings;
-                        Data.ToolInfo.InstanceIdPrefix = () => SettingsWindow.InstanceIdPrefix;
-                        FilePath = filename;
                         OnPropertyChanged("Data");
                         OnPropertyChanged("FilePath");
                         OnPropertyChanged("IsGMS2");
@@ -1081,10 +1068,8 @@ namespace UndertaleModTool
                                                       ? "Tile sets"
                                                       : "Backgrounds & Tile sets";
 
-#pragma warning disable CA1416
                         UndertaleCodeEditor.gettext = null;
                         UndertaleCodeEditor.gettextJSON = null;
-#pragma warning restore CA1416
                     }
 
                     dialog.Hide();
@@ -1157,8 +1142,7 @@ namespace UndertaleModTool
                                 string output;
                                 try
                                 {
-                                    output = new Underanalyzer.Decompiler.DecompileContext(context, code, Data.ToolInfo.DecompilerSettings)
-                                        .DecompileToString();
+                                    output = code.GetDecompiledGML(Data, context);
                                 }
                                 catch (Exception e)
                                 {
@@ -1233,7 +1217,7 @@ namespace UndertaleModTool
 
                     Dispatcher.Invoke(() =>
                     {
-                        this.ShowError("An error occured while trying to save:\n" + e.Message, "Save error");
+                        this.ShowError("An error occurred while trying to save:\n" + e.Message, "Save error");
                     });
 
                     SaveSucceeded = false;
@@ -1250,11 +1234,8 @@ namespace UndertaleModTool
                             File.Delete(filename);
                         File.Move(filename + "temp", filename);
 
-                        await SaveGMLCache(filename, true, dialog, isDifferentPath);
-
                         // Also make the changes to the profile system.
-                        await ProfileSaveEvent(Data, filename);
-                        SaveTempToMainProfile();
+                        await SaveProfile(filename);
                     }
                     else
                     {
@@ -1269,20 +1250,13 @@ namespace UndertaleModTool
                 {
                     Dispatcher.Invoke(() =>
                     {
-                        this.ShowError("An error occured while trying to save:\n" + exc.Message, "Save error");
+                        this.ShowError("An error occurred while trying to save:\n" + exc.Message, "Save error");
                     });
 
                     SaveSucceeded = false;
                 }
-                if (Data != null)
-                {
-                    Data.ToolInfo.ProfileMode = SettingsWindow.ProfileModeEnabled;
-                    Data.ToolInfo.CurrentMD5 = BitConverter.ToString(MD5CurrentlyLoaded).Replace("-", "").ToLowerInvariant();
-                }
 
-#pragma warning disable CA1416
                 UndertaleCodeEditor.gettextJSON = null;
-#pragma warning restore CA1416
 
                 Dispatcher.Invoke(() =>
                 {
@@ -1296,321 +1270,12 @@ namespace UndertaleModTool
             GC.Collect();
         }
 
-        public string GenerateMD5(string filename)
+        public static string GenerateMD5(string filename)
         {
-            using (MD5 md5 = MD5.Create())
-            {
-                using (FileStream fs = File.OpenRead(filename))
-                {
-                    byte[] hash = md5.ComputeHash(fs);
-                    return BitConverter.ToString(hash).Replace("-", "").ToLowerInvariant();
-                }
-            }
-        }
-        private async Task LoadGMLCache(string filename, LoaderDialog dialog = null)
-        {
-            await Task.Run(() =>
-            {
-                if (SettingsWindow.UseGMLCache)
-                {
-                    string cacheDirPath = Path.Combine(ExePath, "GMLCache");
-                    string cacheIndexPath = Path.Combine(cacheDirPath, "index");
+            using MD5 md5 = MD5.Create();
+            using FileStream fs = File.OpenRead(filename);
 
-                    if (!File.Exists(cacheIndexPath))
-                        return;
-
-                    dialog?.Dispatcher.Invoke(() => dialog.ReportProgress("Loading decompiled code cache..."));
-
-                    string[] indexLines = File.ReadAllLines(cacheIndexPath);
-
-                    int num = -1;
-                    for (int i = 0; i < indexLines.Length; i++)
-                        if (indexLines[i] == filename)
-                        {
-                            num = i;
-                            break;
-                        }
-
-                    if (num == -1)
-                        return;
-
-                    if (!File.Exists(Path.Combine(cacheDirPath, num.ToString())))
-                    {
-                        this.ShowWarning("Decompiled code cache file for open data is missing, but its name present in the index.");
-
-                        return;
-                    }
-
-                    string hash = GenerateMD5(filename);
-
-                    using (StreamReader fs = new(Path.Combine(cacheDirPath, num.ToString())))
-                    {
-                        string prevHash = fs.ReadLine();
-
-                        if (!Regex.IsMatch(prevHash, "^[0-9a-fA-F]{32}$")) //if first 32 bytes of cache file are not a valid MD5
-                            this.ShowWarning("Decompiled code cache for open file is broken.\nThe cache will be generated again.");
-                        else
-                        {
-                            if (hash == prevHash)
-                            {
-                                string cacheStr = fs.ReadLine();
-                                string failedStr = fs.ReadLine();
-
-                                try
-                                {
-                                    Data.GMLCache = SystemJson.JsonSerializer.Deserialize<ConcurrentDictionary<string, string>>(cacheStr);
-
-                                    if (failedStr is not null)
-                                        Data.GMLCacheFailed = SystemJson.JsonSerializer.Deserialize<List<string>>(failedStr);
-                                    else
-                                        Data.GMLCacheFailed = new();
-                                }
-                                catch
-                                {
-                                    this.ShowWarning("Decompiled code cache for open file is broken.\nThe cache will be generated again.");
-
-                                    Data.GMLCache = null;
-                                    Data.GMLCacheFailed = null;
-
-                                    return;
-                                }
-
-                                string[] codeNames = Data.Code.Where(x => x.ParentEntry is null).Select(x => x.Name.Content).ToArray();
-                                string[] invalidNames = Data.GMLCache.Keys.Except(codeNames).ToArray();
-                                if (invalidNames.Length > 0)
-                                {
-                                    this.ShowWarning($"Decompiled code cache for open file contains one or more non-existent code names (first - \"{invalidNames[0]}\").\nThe cache will be generated again.");
-
-                                    Data.GMLCache = null;
-
-                                    return;
-                                }
-
-                                Data.GMLCacheChanged = new();
-                                Data.GMLEditedBefore = new();
-                                Data.GMLCacheWasSaved = true;
-                            }
-                            else
-                                this.ShowWarning("Open file differs from the one the cache was generated for.\nThat decompiled code cache will be generated again.");
-                        }
-                    }
-                }
-            });
-        }
-        private async Task SaveGMLCache(string filename, bool updateCache = true, LoaderDialog dialog = null, bool isDifferentPath = false)
-        {
-            await Task.Run(async () =>
-            {
-                if (SettingsWindow.UseGMLCache && Data?.GMLCache?.Count > 0 && Data.GMLCacheIsReady && (isDifferentPath || !Data.GMLCacheWasSaved || !Data.GMLCacheChanged.IsEmpty))
-                {
-                    dialog?.Dispatcher.Invoke(() => dialog.ReportProgress("Saving decompiled code cache..."));
-
-                    string cacheDirPath = Path.Combine(ExePath, "GMLCache");
-                    string cacheIndexPath = Path.Combine(cacheDirPath, "index");
-                    if (!File.Exists(cacheIndexPath))
-                    {
-                        Directory.CreateDirectory(cacheDirPath);
-                        File.WriteAllText(cacheIndexPath, filename);
-                    }
-
-                    List<string> indexLines = File.ReadAllLines(cacheIndexPath).ToList();
-
-                    int num = -1;
-                    for (int i = 0; i < indexLines.Count; i++)
-                        if (indexLines[i] == filename)
-                        {
-                            num = i;
-                            break;
-                        }
-
-                    if (num == -1) //if it's new cache file
-                    {
-                        num = indexLines.Count;
-
-                        indexLines.Add(filename);
-                    }
-
-                    if (updateCache)
-                    {
-                        await GenerateGMLCache(null, dialog, true);
-                        await StopProgressBarUpdater();
-                    }
-
-                    string[] codeNames = Data.Code.Where(x => x.ParentEntry is null).Select(x => x.Name.Content).ToArray();
-                    Dictionary<string, string> sortedCache = new(Data.GMLCache.OrderBy(x => Array.IndexOf(codeNames, x.Key)));
-                    Data.GMLCacheFailed = Data.GMLCacheFailed.OrderBy(x => Array.IndexOf(codeNames, x)).ToList();
-
-                    if (!updateCache && Data.GMLEditedBefore.Count > 0) //if saving the original cache
-                        foreach (string name in Data.GMLEditedBefore)
-                            sortedCache.Remove(name);                   //exclude the code that was edited from the save list
-
-                    dialog?.Dispatcher.Invoke(() => dialog.ReportProgress("Saving decompiled code cache..."));
-
-                    string hash = GenerateMD5(filename);
-
-                    using (FileStream fs = File.Create(Path.Combine(cacheDirPath, num.ToString())))
-                    {
-                        fs.Write(Encoding.UTF8.GetBytes(hash + '\n'));
-                        fs.Write(SystemJson.JsonSerializer.SerializeToUtf8Bytes(sortedCache));
-
-                        if (Data.GMLCacheFailed.Count > 0)
-                        {
-                            fs.WriteByte((byte)'\n');
-                            fs.Write(SystemJson.JsonSerializer.SerializeToUtf8Bytes(Data.GMLCacheFailed));
-                        }
-                    }
-
-                    File.WriteAllLines(cacheIndexPath, indexLines);
-
-                    Data.GMLCacheWasSaved = true;
-                }
-            });
-        }
-
-        public async Task<bool> GenerateGMLCache(GlobalDecompileContext decompileContext = null, object dialog = null, bool clearGMLEditedBefore = false)
-        {
-            if (!SettingsWindow.UseGMLCache)
-                return false;
-
-            bool createdDialog = false;
-            bool existedDialog = false;
-            Data.GMLCacheIsReady = false;
-
-            if (Data.GMLCache is null)
-                Data.GMLCache = new();
-
-            ConcurrentBag<string> failedBag = new();
-
-            if (scriptDialog is null)
-            {
-                if (dialog is null)
-                {
-                    Dispatcher.Invoke(() =>
-                    {
-                        scriptDialog = new LoaderDialog("Script in progress...", "Please wait...")
-                        {
-                            Owner = this,
-                            PreventClose = true
-                        };
-                    });
-
-                    createdDialog = true;
-                }
-                else
-                    scriptDialog = dialog as LoaderDialog;
-            }
-            else
-                existedDialog = true;
-
-            decompileContext ??= new(Data);
-
-            if (Data.GlobalFunctions is null) // If we run script before opening any code
-            {
-                SetProgressBar(null, "Building a cache of all global functions...", 0, 0);
-                await Task.Run(() => GlobalDecompileContext.BuildGlobalFunctionCache(Data));
-            }
-
-            if (Data.GMLCache.IsEmpty)
-            {
-                SetProgressBar(null, "Generating decompiled code cache...", 0, Data.Code.Count);
-                StartProgressBarUpdater();
-
-                await Task.Run(() => Parallel.ForEach(Data.Code, (code) =>
-                {
-                    if (code is not null && code.ParentEntry is null)
-                    {
-                        try
-                        {
-                            Data.GMLCache[code.Name.Content] =
-                                new Underanalyzer.Decompiler.DecompileContext(decompileContext, code, Data.ToolInfo.DecompilerSettings)
-                                    .DecompileToString();
-                        }
-                        catch
-                        {
-                            failedBag.Add(code.Name.Content);
-                        }
-                    }
-
-                    IncrementProgressParallel();
-                }));
-
-                Data.GMLEditedBefore = new(Data.GMLCacheChanged);
-                Data.GMLCacheChanged.Clear();
-                Data.GMLCacheFailed = failedBag.ToList();
-            }
-            else
-            {
-                List<string> codeToUpdate;
-                bool cacheIsFull = !(Data.GMLCache.Count < Data.Code.Where(x => x.ParentEntry is null).Count() - Data.GMLCacheFailed.Count);
-
-                if (cacheIsFull)
-                {
-                    Data.GMLCacheChanged = new(Data.GMLCacheChanged.Distinct()); //remove duplicates
-
-                    codeToUpdate = Data.GMLCacheChanged.ToList();
-                }
-                else
-                {
-                    //add missing and modified code cache names to the update list (and remove duplicates)
-                    codeToUpdate = Data.GMLCacheChanged.Union(
-                        Data.Code.Where(x => x.ParentEntry is null)
-                                 .Select(x => x.Name.Content)
-                                 .Except(Data.GMLCache.Keys)
-                                 .Except(Data.GMLCacheFailed))
-                        .ToList();
-                }
-
-                if (codeToUpdate.Count > 0)
-                {
-                    SetProgressBar(null, "Updating decompiled code cache...", 0, codeToUpdate.Count);
-                    StartProgressBarUpdater();
-
-                    await Task.Run(() => Parallel.ForEach(codeToUpdate.Select(x => Data.Code.ByName(x)), (code) =>
-                    {
-                        if (code is not null && code.ParentEntry is null)
-                        {
-                            try
-                            {
-                                Data.GMLCache[code.Name.Content] =
-                                    new Underanalyzer.Decompiler.DecompileContext(decompileContext, code, Data.ToolInfo.DecompilerSettings)
-                                        .DecompileToString();
-
-                                Data.GMLCacheFailed.Remove(code.Name.Content); //that code compiles now
-                            }
-                            catch
-                            {
-                                failedBag.Add(code.Name.Content);
-                            }
-                        }
-
-                        IncrementProgressParallel();
-                    }));
-
-                    if (clearGMLEditedBefore)
-                        Data.GMLEditedBefore.Clear();
-                    else
-                        Data.GMLEditedBefore = Data.GMLEditedBefore.Union(Data.GMLCacheChanged).ToList();
-
-                    Data.GMLCacheChanged.Clear();
-                    Data.GMLCacheFailed = Data.GMLCacheFailed.Union(failedBag).ToList();
-                    Data.GMLCacheWasSaved = false;
-                }
-                else if (clearGMLEditedBefore)
-                    Data.GMLEditedBefore.Clear();
-
-                if (!existedDialog)
-                    scriptDialog = null;
-
-                if (createdDialog)
-                {
-                    await StopProgressBarUpdater();
-                    HideProgressBar();
-                }
-            }
-
-            Data.GMLCacheIsReady = true;
-
-            return true;
+            return BitConverter.ToString(md5.ComputeHash(fs)).Replace("-", "").ToLowerInvariant();
         }
 
         private void TreeView_SelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
@@ -1828,14 +1493,6 @@ namespace UndertaleModTool
             if (this.ShowQuestion("Delete " + obj + "?" + (!isLast ? "\n\nNote that the code often references objects by ID, so this operation is likely to break stuff because other items will shift up!" : ""), isLast ? MessageBoxImage.Question : MessageBoxImage.Warning, "Confirmation") == MessageBoxResult.Yes)
             {
                 list.Remove(obj);
-                if (obj is UndertaleCode codeObj)
-                {
-                    string codeName = codeObj.Name.Content;
-                    Data.GMLCache?.TryRemove(codeName, out _);
-                    Data.GMLCacheChanged = new ConcurrentBag<string>(Data.GMLCacheChanged.Except(new[] { codeName }));
-                    Data.GMLCacheFailed?.Remove(codeName);
-                    Data.GMLEditedBefore?.Remove(codeName);
-                }
 
                 while (CloseTab(obj)) ;
                 UpdateTree();
@@ -1996,7 +1653,7 @@ namespace UndertaleModTool
             }
             catch (Exception ex)
             {
-                this.ShowError("An error occured in the object references related window.\n" +
+                this.ShowError("An error occurred in the object references related window.\n" +
                                $"Please report this on GitHub.\n\n{ex}");
             }
             finally
@@ -2041,7 +1698,7 @@ namespace UndertaleModTool
             }
             catch (Exception ex)
             {
-                this.ShowError("An error occured in the object references related window.\n" +
+                this.ShowError("An error occurred in the object references related window.\n" +
                                $"Please report this on GitHub.\n\n{ex}");
             }
             finally
@@ -2651,7 +2308,7 @@ namespace UndertaleModTool
                 if (exTypesDict is not null)
                 {
                     string exTypesStr = string.Join(",\n", exTypesDict.Select(x => $"{x.Key}{((x.Value > 1) ? " (x" + x.Value + ")" : string.Empty)}"));
-                    excText = $"{exc.GetType().FullName}: One on more errors occured:\n{exTypesStr}\n\nThe current stacktrace:\n{excLines}";
+                    excText = $"{exc.GetType().FullName}: One on more errors occurred:\n{exTypesStr}\n\nThe current stacktrace:\n{excLines}";
                 }
                 else
                 {
@@ -2880,7 +2537,7 @@ namespace UndertaleModTool
 
             if (!dlgResult.HasValue || dlgResult == false)
             {
-                // returns null (not an empty!!!) string if the dialog has been closed, or an error has occured.
+                // returns null (not an empty!!!) string if the dialog has been closed, or an error has occurred.
                 return null;
             }
 
@@ -3023,13 +2680,13 @@ namespace UndertaleModTool
                 return;
             }
             // Parse it as JSON
-            var actionInfo = JObject.Parse(await result.Content.ReadAsStringAsync());
-            var actionList = (JArray)actionInfo["workflow_runs"];
-            JObject action = null;
+            var actionInfo = await result.Content.ReadFromJsonAsync<JsonObject>();
+            var actionList = (JsonArray)actionInfo["workflow_runs"];
+            JsonObject action = null;
 
             for (int index = 0; index < actionList.Count; index++)
             {
-                var currentAction = (JObject)actionList[index];
+                var currentAction = (JsonObject)actionList[index];
                 if (currentAction["name"].ToString() == detectedActionName)
                 {
                     action = currentAction;
@@ -3061,8 +2718,8 @@ namespace UndertaleModTool
                 return;
             }
 
-            var artifactInfo = JObject.Parse(await result2.Content.ReadAsStringAsync()); // And now parse them as JSON
-            var artifactList = (JArray)artifactInfo["artifacts"];                       // Grab the array of artifacts
+            var artifactInfo = await result2.Content.ReadFromJsonAsync<JsonObject>(); // And now parse them as JSON
+            var artifactList = (JsonArray)artifactInfo["artifacts"]; // Grab the array of artifacts
 
             if (Environment.Is64BitOperatingSystem && !Environment.Is64BitProcess)
             {
@@ -3075,10 +2732,10 @@ namespace UndertaleModTool
                 }
             }
 
-            JObject artifact = null;
+            JsonObject artifact = null;
             for (int index = 0; index < artifactList.Count; index++)
             {
-                var currentArtifact = (JObject)artifactList[index];
+                var currentArtifact = (JsonObject)artifactList[index];
                 string artifactName = (string)currentArtifact["name"];
 
                 // If the tool ever becomes cross platform this needs to check the OS
@@ -3630,7 +3287,7 @@ result in loss of work.");
                         }
                         catch (Exception ex)
                         {
-                            this.ShowError("An error occured while trying to load:\n" + ex.Message, "Load error");
+                            this.ShowError("An error occurred while trying to load:\n" + ex.Message, "Load error");
                         }
 
                         Dispatcher.Invoke(() =>

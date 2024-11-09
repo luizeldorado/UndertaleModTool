@@ -25,7 +25,6 @@ namespace UndertaleModLib.Tests
         public string ScriptErrorMessage => throw new NotImplementedException();
         public string ExePath => throw new NotImplementedException();
         public string ScriptErrorType => throw new NotImplementedException();
-        public bool GMLCacheEnabled => throw new NotImplementedException();
 
         public bool IsAppClosed => throw new NotImplementedException();
 
@@ -68,11 +67,6 @@ namespace UndertaleModLib.Tests
         {
         }
         public bool RunUMTScript(string path)
-        {
-            Console.WriteLine(path);
-            return true;
-        }
-        public bool LintUMTScript(string path)
         {
             Console.WriteLine(path);
             return true;
@@ -232,19 +226,6 @@ namespace UndertaleModLib.Tests
         {
             Console.WriteLine("Stopping progress bar updater...");
             await Task.Delay(1); //dummy await
-        }
-
-        public async Task<bool> GenerateGMLCache(GlobalDecompileContext? decompileContext = null, object? dialog = null, bool clearGMLEditedBefore = false)
-        {
-            Console.WriteLine(String.Format("GenerateGMLCache(): *decompileContext*{0}, *dialog*{1}, {2}",
-                                            decompileContext is null ? " (null)" : "",
-                                            dialog is null ? " (null)" : "",
-                                            clearGMLEditedBefore.ToString().ToLower())
-                              );
-
-            await Task.Delay(1); //dummy await
-
-            return false;
         }
 
         public void ScriptError(string error, string title = "Error", bool SetConsoleText = true)

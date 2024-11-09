@@ -90,11 +90,6 @@ public interface IScriptInterface
     string ScriptErrorType { get; }
 
     /// <summary>
-    /// Indicates whether the user has enabled the setting to use decompiled code cache.
-    /// </summary>
-    bool GMLCacheEnabled { get; }
-
-    /// <summary>
     /// Indicating whether the Program is currently closed.
     /// //TODO: Only GUI + ExportAllRoomsToPng.csx uses this, but nothing should ever need to access this value.
     /// <c>"somehow Dispatcher.Invoke() in a loop creates executable code queue that doesn't clear on app closing."</c>
@@ -157,13 +152,6 @@ public interface IScriptInterface
     /// <param name="path">File path to the script file to execute.</param>
     /// <returns>A <see cref="bool"/> that indicates whether the execution of the script was successful.</returns>
     bool RunUMTScript(string path);
-
-    /// <summary>
-    /// Lint whether a file is C# UndertaleModLib compatible.
-    /// </summary>
-    /// <param name="path">File path to the script file to lint.</param>
-    /// <returns>A <see cref="bool"/> that indicates whether the linting was successful.</returns>
-    bool LintUMTScript(string path);
 
     /// <summary>
     /// Initializes a Script Dialog with default values
@@ -413,16 +401,6 @@ public interface IScriptInterface
     /// </summary>
     /// <returns>A task that represents the stopped progress updater.</returns>
     Task StopProgressBarUpdater();
-
-    /// <summary>
-    /// Generates a decompiled code cache to accelerate operations that need to access code often.
-    /// </summary>
-    /// <param name="decompileContext">The GlobalDecompileContext to be used when decompiling.</param>
-    /// <param name="dialog">The dialog that should be shown. If <see langword="null"/> then a new dialog will be automatically created and shown.</param>
-    /// <param name="clearGMLEditedBefore">Whether to clear <see cref="UndertaleData.GMLEditedBefore"/> from <see cref="Data"/>.</param>
-    /// <returns>Whether the decompiled GML cache was generated or not. <see langword="true"/> if it was successful,
-    /// <see langword="false"/> if it wasn't or <see cref="GMLCacheEnabled"/> is disabled.</returns>
-    Task<bool> GenerateGMLCache(GlobalDecompileContext decompileContext = null, object dialog = null, bool clearGMLEditedBefore = false);
 
     /// <summary>
     /// Changes the currently selected in the GUI.

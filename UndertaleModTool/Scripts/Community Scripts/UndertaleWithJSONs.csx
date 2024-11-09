@@ -1,11 +1,12 @@
-using System.Text;
-using System;
+using System.Collections.Generic;
 using System.IO;
-using System.Threading;
+using System.Text.Json;
 using System.Threading.Tasks;
-using Newtonsoft.Json;
 using Underanalyzer.Decompiler;
 using Underanalyzer.Decompiler.AST;
+using UndertaleModLib;
+using UndertaleModLib.Decompiler;
+using UndertaleModLib.Models;
 
 // Made by Grossley with the help of colinator27
 
@@ -146,7 +147,7 @@ void MakeJSON(string language)
     }
 
     string outputPath = Path.Combine(langFolder, "lang_" + language + ".json");
-    File.WriteAllText(outputPath, JsonConvert.SerializeObject(contents, Formatting.Indented));
+    File.WriteAllText(outputPath, JsonSerializer.Serialize(contents, new JsonSerializerOptions { WriteIndented = true }));
 
     IncProgressLocal();
     UpdateProgressValue(GetProgress());

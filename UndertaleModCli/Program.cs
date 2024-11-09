@@ -12,7 +12,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis.CSharp.Scripting;
 using Microsoft.CodeAnalysis.Scripting;
-using Newtonsoft.Json;
 using UndertaleModLib;
 using UndertaleModLib.Models;
 using UndertaleModLib.Scripting;
@@ -192,7 +191,6 @@ public partial class Program : IScriptInterface
                 "System.Text.RegularExpressions")
             .AddReferences(typeof(UndertaleObject).GetTypeInfo().Assembly,
                 GetType().GetTypeInfo().Assembly,
-                typeof(JsonConvert).GetTypeInfo().Assembly,
                 typeof(System.Text.RegularExpressions.Regex).GetTypeInfo().Assembly,
                 typeof(TextureWorker).GetTypeInfo().Assembly,
                 typeof(ImageMagick.MagickImage).GetTypeInfo().Assembly,
