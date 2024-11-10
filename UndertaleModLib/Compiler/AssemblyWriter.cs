@@ -102,7 +102,7 @@ namespace UndertaleModLib.Compiler
                     bool defineArguments = true;
                     if (compileContext.OriginalCode != null)
                     {
-                        UndertaleCodeLocals locals = compileContext.Data?.CodeLocals.For(compileContext.OriginalCode);
+                        UndertaleCodeLocals locals = compileContext.Data?.CodeLocals?.For(compileContext.OriginalCode);
                         if (locals != null)
                         {
                             // Update the code locals of the UndertaleCode

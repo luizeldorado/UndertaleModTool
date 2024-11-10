@@ -435,7 +435,7 @@ public partial class Program : IScriptInterface
 
         try
         {
-            return code.Disassemble(Data.Variables, Data.CodeLocals.For(code));
+            return code.Disassemble(Data.Variables, Data.CodeLocals?.For(code));
         }
         catch (Exception e)
         {
@@ -638,7 +638,7 @@ public partial class Program : IScriptInterface
         else if (code.ParentEntry is not null)
             return;
 
-        if (Data?.GeneralInfo.BytecodeVersion > 14 && Data.CodeLocals.ByName(codeName) == null)
+        if (Data.CodeLocals is not null && Data.CodeLocals.ByName(codeName) is null)
         {
             UndertaleCodeLocals locals = new UndertaleCodeLocals();
             locals.Name = code.Name;
