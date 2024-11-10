@@ -149,7 +149,7 @@ namespace UndertaleModTool.Windows
                 if (code is not null && code.ParentEntry is null)
                 {
                     var codeText = isInAssembly
-                        ? code.Disassemble(mainWindow.Data.Variables, mainWindow.Data.CodeLocals.For(code))
+                        ? code.Disassemble(mainWindow.Data.Variables, mainWindow.Data.CodeLocals?.For(code))
                         : code.GetGML(mainWindow.Data, globalDecompileContext);
                     SearchInCodeText(code.Name.Content, codeText);
                 }
