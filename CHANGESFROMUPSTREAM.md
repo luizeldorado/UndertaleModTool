@@ -29,3 +29,5 @@ Changes from upstream/master (caf04126):
 - fix-2024-6-masks: 05b4961b
 
 - tile-editor (thank you CST1229!): 2acabb30~..181f6018
+
+- ua-code-locals-removal-handling-1 (thank you Dobby233Liu!): 2dec4a8e~..1e6e53fc 33cb7ecf cf1761ff
