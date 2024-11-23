@@ -559,45 +559,46 @@ public class UndertaleInstruction : UndertaleObject, IGMInstruction
                     else
                         writer.Write((byte)Kind);
 
-                    // Write value being pushed
-                    switch (Type1)
-                    {
-                        case DataType.Double:
-                            writer.Write((double)Value);
+                // Write value being pushed
+                switch (Type1)
+                {
+                    case DataType.Double:
+                        writer.Write((double)Value);
+                        break;
+                    case DataType.Float:
+                        writer.Write((float)Value);
+                        break;
+                    case DataType.Int32:
+                        if (Value.GetType() == typeof(Reference<UndertaleFunction>))
+                        {
+                            // Write function reference, rather than integer
+                            writer.WriteUndertaleObject((Reference<UndertaleFunction>)Value);
                             break;
-                        case DataType.Float:
-                            writer.Write((float)Value);
-                            break;
-                        case DataType.Int32:
-                            if (Value.GetType() == typeof(Reference<UndertaleFunction>))
-                            {
-                                // Write function reference, rather than integer
-                                writer.WriteUndertaleObject((Reference<UndertaleFunction>)Value);
-                                break;
-                            }
-                            if (Value.GetType() == typeof(Reference<UndertaleVariable>))
-                            {
-                                writer.WriteUndertaleObject((Reference<UndertaleVariable>)Value);
-                                break;
-                            }
-                            writer.Write((int)Value);
-                            break;
-                        case DataType.Int64:
-                            writer.Write((long)Value);
-                            break;
-                        case DataType.Boolean:
-                            writer.Write((bool)Value ? 1 : 0);
-                            break;
-                        case DataType.Variable:
+                        }
+                        if (Value.GetType() == typeof(Reference<UndertaleVariable>))
+                        {
+                            // Write variable reference, rather than integer
                             writer.WriteUndertaleObject((Reference<UndertaleVariable>)Value);
                             break;
-                        case DataType.String:
-                            writer.WriteUndertaleObject((UndertaleResourceById<UndertaleString, UndertaleChunkSTRG>)Value);
-                            break;
-                        case DataType.Int16:
-                            // Data is encoded in the first two bytes of the instruction (was already written above)
-                            break;
-                    }
+                        }
+                        writer.Write((int)Value);
+                        break;
+                    case DataType.Int64:
+                        writer.Write((long)Value);
+                        break;
+                    case DataType.Boolean:
+                        writer.Write((bool)Value ? 1 : 0);
+                        break;
+                    case DataType.Variable:
+                        writer.WriteUndertaleObject((Reference<UndertaleVariable>)Value);
+                        break;
+                    case DataType.String:
+                        writer.WriteUndertaleObject((UndertaleResourceById<UndertaleString, UndertaleChunkSTRG>)Value);
+                        break;
+                    case DataType.Int16:
+                        // Data is encoded in the first two bytes of the instruction (was already written above)
+                        break;
+                }
 
                     break;
                 }
@@ -869,25 +870,28 @@ public class UndertaleInstruction : UndertaleObject, IGMInstruction
                     {
                         IntArgument = reader.ReadInt32();
 
-                        // Existence of this argument implies GameMaker 2023.8 or above
-                        if (!reader.undertaleData.IsVersionAtLeast(2023, 8))
-                        {
-                            reader.undertaleData.SetGMS2Version(2023, 8);
-                        }
-                        if (!reader.undertaleData.IsVersionAtLeast(2024, 4))
-                        {
-                            if (CheckIfAssetTypeIs2024_4(reader.undertaleData, IntArgument & 0xffffff, IntArgument >> 24))
-                                reader.undertaleData.SetGMS2Version(2024, 4);
-                        }
-                    }
-                    // If this is a chknullish instruction (ID -10), then this implies GameMaker 2.3.7 or above
-                    if (value == -10 && reader.undertaleData.IsVersionAtLeast(2, 3))
+                    // Existence of this argument implies GameMaker 2023.8 or above
+                    if (!reader.undertaleData.IsVersionAtLeast(2023, 8))
                     {
-                        if (!reader.undertaleData.IsVersionAtLeast(2, 3, 7))
-                        {
-                            reader.undertaleData.SetGMS2Version(2, 3, 7);
-                        }
+                        reader.undertaleData.SetGMS2Version(2023, 8);
                     }
+
+                    // If this is an asset type found in GameMaker 2024.4 or above, track that as well
+                    if (!reader.undertaleData.IsVersionAtLeast(2024, 4))
+                    {
+                        if (CheckIfAssetTypeIs2024_4(reader.undertaleData, IntArgument & 0xffffff, IntArgument >> 24))
+                            reader.undertaleData.SetGMS2Version(2024, 4);
+                    }
+                }
+
+                // If this is a chknullish instruction (ID -10), then this implies GameMaker 2.3.7 or above
+                if (value == -10 && reader.undertaleData.IsVersionAtLeast(2, 3))
+                {
+                    if (!reader.undertaleData.IsVersionAtLeast(2, 3, 7))
+                    {
+                        reader.undertaleData.SetGMS2Version(2, 3, 7);
+                    }
+                }
 
                     // Assign remaining values to instruction
                     Value = value;
@@ -1108,7 +1112,7 @@ public class UndertaleInstruction : UndertaleObject, IGMInstruction
                 sbh.Append(stringBuilder, ' ');
                 if (Type1 == DataType.Int16)
                 {
-                    // Special scenario - the swap instruction
+                    // Special scenario - the swap instruction (see #129)
                     sbh.Append(stringBuilder, SwapExtra);
                 }
                 else
