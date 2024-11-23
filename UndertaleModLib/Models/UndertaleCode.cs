@@ -576,6 +576,7 @@ public class UndertaleInstruction : UndertaleObject, IGMInstruction
                         }
                         if (Value.GetType() == typeof(Reference<UndertaleVariable>))
                         {
+                            // Write variable reference, rather than integer
                             writer.WriteUndertaleObject((Reference<UndertaleVariable>)Value);
                             break;
                         }
@@ -873,6 +874,8 @@ public class UndertaleInstruction : UndertaleObject, IGMInstruction
                     {
                         reader.undertaleData.SetGMS2Version(2023, 8);
                     }
+
+                    // If this is an asset type found in GameMaker 2024.4 or above, track that as well
                     if (!reader.undertaleData.IsVersionAtLeast(2024, 4))
                     {
                         if (CheckIfAssetTypeIs2024_4(reader.undertaleData, IntArgument & 0xffffff, IntArgument >> 24))
@@ -1108,7 +1111,7 @@ public class UndertaleInstruction : UndertaleObject, IGMInstruction
                 sbh.Append(stringBuilder, ' ');
                 if (Type1 == DataType.Int16)
                 {
-                    // Special scenario - the swap instruction
+                    // Special scenario - the swap instruction (see #129)
                     sbh.Append(stringBuilder, SwapExtra);
                 }
                 else
