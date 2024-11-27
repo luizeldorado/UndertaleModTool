@@ -1,0 +1,42 @@
+name: Build
+
+on:
+  workflow_call:
+    inputs:
+      debug:
+        description: 'If true, build with Debug configuration, otherwise build with Release configuration'
+        type: boolean
+        default: false
+
+env:
+  CONFIGURATION: ${{ inputs.debug && 'Debug' || 'Release' }}
+
+jobs:
+  build_gui:
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+      with:
+        submodules: true
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 8.0.x
+    - name: Restore dependencies
+      run: dotnet restore -r win-x64
+    - name: Publish UndertaleModTool
+      run:  dotnet publish UndertaleModTool --no-restore -c ${{ env.CONFIGURATION }} --self-contained true -p:PublishSingleFile=true -p:DebugType=embedded --output ./publish/UndertaleModTool
+    - name: Publish UndertaleModToolUpdater
+      run: dotnet publish UndertaleModToolUpdater --no-restore -c ${{ env.CONFIGURATION }} --self-contained true -p:PublishSingleFile=true -p:DebugType=embedded --output ./publish/UndertaleModTool/Updater
+    - name: Copy external files
+      run: |
+        cp ./README.md ./publish/UndertaleModTool
+        cp ./SCRIPTS.md ./publish/UndertaleModTool
+        cp ./LICENSE.txt ./publish/UndertaleModTool
+    - name: Upload artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: UndertaleModTool-${{ env.CONFIGURATION }}
+        path: ./publish/UndertaleModTool
