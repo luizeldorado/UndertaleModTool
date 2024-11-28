@@ -1,12 +1,37 @@
 name: Build master
 
 on:
+  workflow_dispatch:
   push:
     branches: [ master ]
-  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: true
+
+env:
+  GH_TOKEN: ${{ github.token }}
 
 jobs:
   build_master:
     uses: ./.github/workflows/build.yml
-    with:
-      debug: true
+  release_bleeding_edge:
+    needs: [build_master]
+    runs-on: ubuntu-latest
+    steps:
+    - name: Download artifacts
+      uses: actions/download-artifact@v4
+      with:
+        path: ./artifacts
+    - name: Zip artifacts
+      run: |
+        for dirname in ./artifacts/*/; do
+          7z a -tzip ./artifacts/$(basename $dirname).zip $dirname*
+          rm -r $dirname
+        done
+
+    - name: Delete old release
+      continue-on-error: true
+      run: gh release delete bleeding-edge --yes --repo ${{ github.repository }}
+    - name: Create release
+      run: gh release create bleeding-edge ./artifacts/* --prerelease --target master --title "Bleeding Edge" --notes "This is an automatically updating **bleeding edge** build of UndertaleModTool. There *will* be bugs! If you encounter any, please make an issue on GitHub or join the Underminers Discord for more help!" --repo ${{ github.repository }}

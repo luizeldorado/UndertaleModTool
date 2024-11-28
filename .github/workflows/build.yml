@@ -1,6 +1,7 @@
 name: Build
 
 on:
+  workflow_dispatch:
   workflow_call:
     inputs:
       debug:
@@ -24,12 +25,10 @@ jobs:
       uses: actions/setup-dotnet@v4
       with:
         dotnet-version: 8.0.x
-    - name: Restore dependencies
-      run: dotnet restore -r win-x64
     - name: Publish UndertaleModTool
-      run:  dotnet publish UndertaleModTool --no-restore -c ${{ env.CONFIGURATION }} --self-contained true -p:PublishSingleFile=true -p:DebugType=embedded --output ./publish/UndertaleModTool
+      run:  dotnet publish UndertaleModTool -c ${{ env.CONFIGURATION }} --self-contained true -p:PublishSingleFile=true -p:DebugType=embedded -r win-x64 --output ./publish/UndertaleModTool
     - name: Publish UndertaleModToolUpdater
-      run: dotnet publish UndertaleModToolUpdater --no-restore -c ${{ env.CONFIGURATION }} --self-contained true -p:PublishSingleFile=true -p:DebugType=embedded --output ./publish/UndertaleModTool/Updater
+      run: dotnet publish UndertaleModToolUpdater -c ${{ env.CONFIGURATION }} --self-contained true -p:PublishSingleFile=true -p:DebugType=embedded -r win-x64 --output ./publish/UndertaleModTool/Updater
     - name: Copy external files
       run: |
         cp ./README.md ./publish/UndertaleModTool
@@ -38,5 +37,5 @@ jobs:
     - name: Upload artifact
       uses: actions/upload-artifact@v4
       with:
-        name: UndertaleModTool-${{ env.CONFIGURATION }}
+        name: UndertaleModTool-${{ github.sha }}-${{ env.CONFIGURATION }}
         path: ./publish/UndertaleModTool
