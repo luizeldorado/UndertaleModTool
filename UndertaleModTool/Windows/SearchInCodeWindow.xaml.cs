@@ -58,6 +58,7 @@ namespace UndertaleModTool.Windows
         {
             Activate();
             SearchTextBox.Focus();
+            SearchTextBox.SelectAll();
         }
 
         private async void SearchButton_Click(object sender, RoutedEventArgs e)
@@ -81,7 +82,7 @@ namespace UndertaleModTool.Windows
                 return;
             }
 
-            text = SearchTextBox.Text;
+            text = SearchTextBox.Text.Replace("\r\n", "\n");
 
             if (String.IsNullOrEmpty(text))
                 return;
@@ -167,26 +168,59 @@ namespace UndertaleModTool.Windows
 
         void SearchInCodeText(string codeName, string codeText)
         {
-            var lineNumber = 0;
-            StringReader codeTextReader = new(codeText);
-            bool nameWritten = false;
-            string lineText;
-            while ((lineText = codeTextReader.ReadLine()) is not null)
-            {
-                lineNumber += 1;
-                if (lineText == string.Empty)
-                    continue;
+            List<int> results = new();
 
-                if (((isRegexSearch && keywordRegex.Match(lineText).Success) || ((!isRegexSearch && isCaseSensitive) ? lineText.Contains(text) : lineText.Contains(text, StringComparison.CurrentCultureIgnoreCase))))
+            if (isRegexSearch)
+            {
+                MatchCollection matches = keywordRegex.Matches(codeText);
+                foreach (Match match in matches)
                 {
-                    if (nameWritten == false)
-                    {
-                        resultsDict[codeName] = new List<(int, string)>();
-                        nameWritten = true;
-                    }
-                    resultsDict[codeName].Add((lineNumber, lineText));
-                    Interlocked.Increment(ref resultCount);
+                    results.Add(match.Index);
                 }
+            }
+            else
+            {
+                StringComparison comparisonType = isCaseSensitive ? StringComparison.CurrentCulture : StringComparison.CurrentCultureIgnoreCase;
+
+                int index = 0;
+                while ((index = codeText.IndexOf(text, index, comparisonType)) != -1)
+                {
+                    results.Add(index);
+                    index += text.Length;
+                }
+            }
+
+            bool nameWritten = false;
+
+            int lineNumber = 0;
+            int lineStartIndex = 0;
+
+            foreach (int index in results)
+            {
+                // Continue from previous line count since results are in order
+                for (int i = lineStartIndex; i < index; ++i)
+                {
+                    if (codeText[i] == '\n')
+                    {
+                        lineNumber++;
+                        lineStartIndex = i + 1;
+                    }
+                }
+
+                // Start at match.Index so it's only one line in case the search was multiline
+                int lineEndIndex = codeText.IndexOf('\n', index);
+                lineEndIndex = lineEndIndex == -1 ? codeText.Length : lineEndIndex;
+
+                string lineText = codeText[lineStartIndex..lineEndIndex];
+
+                if (nameWritten == false)
+                {
+                    resultsDict[codeName] = new List<(int, string)>();
+                    nameWritten = true;
+                }
+                resultsDict[codeName].Add((lineNumber + 1, lineText));
+
+                Interlocked.Increment(ref resultCount);
             }
         }
 
@@ -233,6 +267,15 @@ namespace UndertaleModTool.Windows
                 .Cast<Result>()
                 .Select(result => $"{result.Code}\t{result.LineNumber}\t{result.LineText}"));
             Clipboard.SetText(str);
+        }
+
+        private async void SearchTextBox_PreviewKeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Enter && !Keyboard.Modifiers.HasFlag(ModifierKeys.Shift))
+            {
+                e.Handled = true;
+                await Search();
+            }
         }
 
         private void ListViewItem_MouseDoubleClick(object sender, MouseButtonEventArgs e)
