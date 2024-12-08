@@ -1,5 +1,8 @@
 ﻿using System;
 using System.ComponentModel;
+using System.Diagnostics;
+using System.IO;
+using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -144,19 +147,11 @@ namespace UndertaleModTool
             }
         }
 
-        private void Import_Click(object sender, RoutedEventArgs e)
+        bool ImportImage(string filePath)
         {
-            OpenFileDialog dlg = new OpenFileDialog();
-
-            dlg.DefaultExt = ".png";
-            dlg.Filter = "PNG files (.png)|*.png|All files|*";
-
-            if (!(dlg.ShowDialog() ?? false))
-                return;
-
             try
             {
-                using MagickImage image = TextureWorker.ReadBGRAImageFromFile(dlg.FileName);
+                using MagickImage image = TextureWorker.ReadBGRAImageFromFile(filePath);
                 UndertaleTexturePageItem item = DataContext as UndertaleTexturePageItem;
 
                 var previousFormat = item.TexturePage.TextureData.Image.Format;
@@ -173,15 +168,46 @@ namespace UndertaleModTool
 
                 // Refresh the image of "ItemDisplay"
                 if (ItemDisplay.FindName("RenderAreaBorder") is not Border border)
-                    return;
+                    return true;
                 if (border.Background is not ImageBrush brush)
-                    return;
+                    return true;
                 BindingOperations.GetBindingExpression(brush, ImageBrush.ImageSourceProperty)?.UpdateTarget();
+
+                return true;
             }
             catch (Exception ex)
             {
                 mainWindow.ShowError(ex.Message, "Failed to import image");
+                return false;
             }
+        }
+
+        bool ExportImage(string filePath)
+        {
+            using TextureWorker worker = new();
+            try
+            {
+                worker.ExportAsPNG((UndertaleTexturePageItem)DataContext, filePath);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                mainWindow.ShowError("Failed to export file: " + ex.Message, "Failed to export file");
+                return false;
+            }
+        }
+
+        private void Import_Click(object sender, RoutedEventArgs e)
+        {
+            OpenFileDialog dlg = new OpenFileDialog();
+
+            dlg.DefaultExt = ".png";
+            dlg.Filter = "PNG files (.png)|*.png|All files|*";
+
+            if (!(dlg.ShowDialog() ?? false))
+                return;
+
+            ImportImage(dlg.FileName);
         }
 
         private void Export_Click(object sender, RoutedEventArgs e)
@@ -193,15 +219,60 @@ namespace UndertaleModTool
 
             if (dlg.ShowDialog() == true)
             {
-                using TextureWorker worker = new();
-                try
-                {
-                    worker.ExportAsPNG((UndertaleTexturePageItem)DataContext, dlg.FileName);
-                }
-                catch (Exception ex)
-                {
-                    mainWindow.ShowError("Failed to export file: " + ex.Message, "Failed to export file");
-                }
+                ExportImage(dlg.FileName);
+            }
+        }
+
+        private async void Edit_Click(object sender, RoutedEventArgs e)
+        {
+            UndertaleTexturePageItem item = (DataContext as UndertaleTexturePageItem);
+
+            CancellationTokenSource cancellationTokenSource = new();
+
+            LoaderDialog dialog = new("Image editor open", "Waiting for image editor to close...");
+            dialog.Owner = mainWindow;
+            dialog.Maximum = null;
+            dialog.Closed += (sender, e) =>
+            {
+                cancellationTokenSource.Cancel();
+            };
+            dialog.Update("");
+
+            dialog.Show();
+            mainWindow.IsEnabled = false;
+
+            // Export file to temp folder
+            string directory = Path.Join(Path.GetTempPath(), "UndertaleModTool");
+            Directory.CreateDirectory(directory);
+
+            string path = Path.Join(directory, $"Temp {DateTimeOffset.Now.ToUnixTimeMilliseconds()} {item.Name.Content}.png");
+
+            try
+            {
+                if (!ExportImage(path))
+                    return;
+
+                // Open in edit mode
+                Process process = new();
+                process.StartInfo.FileName = path;
+                process.StartInfo.Verb = "edit";
+                process.StartInfo.UseShellExecute = true;
+                process.Start();
+
+
+                await process.WaitForExitAsync(cancellationTokenSource.Token);
+                ImportImage(path);
+            }
+            catch (OperationCanceledException)
+            {
+                // Nothing to do
+            }
+            finally
+            {
+                if (File.Exists(path))
+                    File.Delete(path);
+                dialog.Close();
+                mainWindow.IsEnabled = true;
             }
         }
 
