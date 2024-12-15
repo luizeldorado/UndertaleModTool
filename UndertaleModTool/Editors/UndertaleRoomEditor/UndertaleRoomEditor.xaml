@@ -380,7 +380,7 @@
                                 <RowDefinition Height="Auto" SharedSizeGroup="{Binding Flags, Mode=OneTime, Converter={StaticResource GridSizeGroupConverter}}"/>
                                 <RowDefinition Height="Auto" SharedSizeGroup="{Binding Flags, Mode=OneTime, Converter={StaticResource GridSizeGroupConverter}}"/>
                                 <RowDefinition Height="Auto" SharedSizeGroup="s22"/>
-                                <RowDefinition Height="Auto" SharedSizeGroup="s22"/>
+                                <RowDefinition Height="Auto" />
                                 <RowDefinition Height="Auto" SharedSizeGroup="s22"/>
                                 <RowDefinition Height="Auto" SharedSizeGroup="s22"/>
                                 <RowDefinition Height="Auto" SharedSizeGroup="s22"/>
@@ -422,7 +422,7 @@
                                                             Room="{Binding}"/>
 
                             <TextBlock Grid.Row="8" Grid.Column="0" Margin="3">Flags</TextBlock>
-                            <TextBox Grid.Row="8" Grid.Column="2" Margin="3" Text="{Binding Flags, Converter={StaticResource IsGMS2Converter}, ConverterParameter=flags}"/>
+                            <local:FlagsBox Grid.Row="8" Grid.Column="2" Margin="3" Value="{Binding Flags, Converter={StaticResource IsGMS2Converter}, ConverterParameter=flags}"/>
 
                             <TextBlock Grid.Row="9" Grid.Column="0" Margin="3">World</TextBlock>
                             <TextBox Grid.Row="9" Grid.Column="2" Margin="3" Text="{Binding World}"/>
