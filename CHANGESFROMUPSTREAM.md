@@ -25,3 +25,7 @@ Changes from upstream/master (e1f5d22a):
 - ua-code-locals-removal-handling-1 (thank you Dobby233Liu!): 2dec4a8e~..1e6e53fc 33cb7ecf cf1761ff
 
 - new-github-actions: 1c5362fd~..3201f6e1
+
+- new-dark-mode: cc838650~..a31abe35 78426300
+
+- flags-editor: 253faf18 73474d97
