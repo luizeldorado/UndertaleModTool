@@ -43,15 +43,15 @@ namespace Theme.WPF.Themes.Attached
         public static readonly DependencyProperty HorizontalScrollingAmountProperty = DependencyProperty.RegisterAttached("HorizontalScrollingAmount", typeof(int), typeof(HorizontalScrolling), new PropertyMetadata(ScrollChars));
 
         public static void SetUseHorizontalScrolling(DependencyObject element, bool value) => element.SetValue(UseHorizontalScrollingProperty, value);
-        public static bool GetUseHorizontalScrolling(DependencyObject element) => (bool) element.GetValue(UseHorizontalScrollingProperty);
+        public static bool GetUseHorizontalScrolling(DependencyObject element) => (bool)element.GetValue(UseHorizontalScrollingProperty);
 
         public static void SetIsRequireShiftForHorizontalScroll(DependencyObject element, bool value) => element.SetValue(IsRequireShiftForHorizontalScrollProperty, value);
-        public static bool GetIsRequireShiftForHorizontalScroll(DependencyObject element) => (bool) element.GetValue(IsRequireShiftForHorizontalScrollProperty);
+        public static bool GetIsRequireShiftForHorizontalScroll(DependencyObject element) => (bool)element.GetValue(IsRequireShiftForHorizontalScrollProperty);
 
-        public static bool GetForceHorizontalScrolling(DependencyObject d) => (bool) d.GetValue(ForceHorizontalScrollingProperty);
+        public static bool GetForceHorizontalScrolling(DependencyObject d) => (bool)d.GetValue(ForceHorizontalScrollingProperty);
         public static void SetForceHorizontalScrolling(DependencyObject d, bool value) => d.SetValue(ForceHorizontalScrollingProperty, value);
 
-        public static int GetHorizontalScrollingAmount(DependencyObject d) => (int) d.GetValue(HorizontalScrollingAmountProperty);
+        public static int GetHorizontalScrollingAmount(DependencyObject d) => (int)d.GetValue(HorizontalScrollingAmountProperty);
         public static void SetHorizontalScrollingAmount(DependencyObject d, int value) => d.SetValue(HorizontalScrollingAmountProperty, value);
 
         private static void OnUseHorizontalScrollWheelPropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
@@ -59,7 +59,7 @@ namespace Theme.WPF.Themes.Attached
             if (d is UIElement element)
             {
                 element.PreviewMouseWheel -= OnPreviewMouseWheel;
-                if ((bool) e.NewValue)
+                if ((bool)e.NewValue)
                 {
                     element.PreviewMouseWheel += OnPreviewMouseWheel;
                 }
@@ -130,7 +130,7 @@ namespace Theme.WPF.Themes.Attached
             int count, i;
             if (obj is ContentControl)
             {
-                DependencyObject child = ((ContentControl) obj).Content as DependencyObject;
+                DependencyObject child = ((ContentControl)obj).Content as DependencyObject;
                 if (child is T t)
                 {
                     return t;

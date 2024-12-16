@@ -13,7 +13,7 @@ namespace Theme.WPF.Themes.Attached
 
         public static bool GetUseStretchedContent(DependencyObject element)
         {
-            return (bool) element.GetValue(UseStretchedContentProperty);
+            return (bool)element.GetValue(UseStretchedContentProperty);
         }
     }
 }

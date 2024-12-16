@@ -7,19 +7,19 @@ namespace Theme.WPF.Themes
         private void CloseWindow_Event(object sender, RoutedEventArgs e)
         {
             if (e.Source != null)
-                this.CloseWind(Window.GetWindow((FrameworkElement) e.Source));
+                this.CloseWind(Window.GetWindow((FrameworkElement)e.Source));
         }
 
         private void AutoMinimize_Event(object sender, RoutedEventArgs e)
         {
             if (e.Source != null)
-                this.MaximizeRestore(Window.GetWindow((FrameworkElement) e.Source));
+                this.MaximizeRestore(Window.GetWindow((FrameworkElement)e.Source));
         }
 
         private void Minimize_Event(object sender, RoutedEventArgs e)
         {
             if (e.Source != null)
-                this.MinimizeWind(Window.GetWindow((FrameworkElement) e.Source));
+                this.MinimizeWind(Window.GetWindow((FrameworkElement)e.Source));
         }
 
         public void CloseWind(Window window) => window?.Close();

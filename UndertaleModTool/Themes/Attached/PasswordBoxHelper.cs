@@ -18,7 +18,7 @@ namespace Theme.WPF.Themes.Attached
             if (d is PasswordBox box)
             {
                 box.PasswordChanged -= BoxOnPasswordChanged;
-                if (e.NewValue != null && (bool) e.NewValue)
+                if (e.NewValue != null && (bool)e.NewValue)
                 {
                     box.PasswordChanged += BoxOnPasswordChanged;
                 }
@@ -38,7 +38,7 @@ namespace Theme.WPF.Themes.Attached
 
         public static bool GetListenToLength(PasswordBox box)
         {
-            return (bool) box.GetValue(ListenToLengthProperty);
+            return (bool)box.GetValue(ListenToLengthProperty);
         }
 
         public static void SetListenToLength(PasswordBox box, bool value)
@@ -48,7 +48,7 @@ namespace Theme.WPF.Themes.Attached
 
         public static int GetInputLength(PasswordBox box)
         {
-            return (int) box.GetValue(InputLengthProperty);
+            return (int)box.GetValue(InputLengthProperty);
         }
 
         public static void SetInputLength(PasswordBox box, int value)
@@ -58,7 +58,7 @@ namespace Theme.WPF.Themes.Attached
 
         private static void BoxOnPasswordChanged(object sender, RoutedEventArgs e)
         {
-            SetInputLength((PasswordBox) sender, ((PasswordBox) sender).SecurePassword.Length);
+            SetInputLength((PasswordBox)sender, ((PasswordBox)sender).SecurePassword.Length);
         }
     }
 }

@@ -8,6 +8,6 @@ namespace Theme.WPF.Themes.Attached
 
         public static void SetValue(DependencyObject element, CornerRadius value) => element.SetValue(ValueProperty, value);
 
-        public static CornerRadius GetValue(DependencyObject element) => (CornerRadius) element.GetValue(ValueProperty);
+        public static CornerRadius GetValue(DependencyObject element) => (CornerRadius)element.GetValue(ValueProperty);
     }
 }

@@ -53,13 +53,13 @@ namespace UndertaleModTool
                 typeof(UndertaleObjectReference),
                 new FrameworkPropertyMetadata(true,
                     FrameworkPropertyMetadataOptions.BindsTwoWayByDefault));
-					
+
         public static DependencyProperty CanChangeProperty =
             DependencyProperty.Register("CanChange", typeof(bool),
                 typeof(UndertaleObjectReference),
                 new FrameworkPropertyMetadata(true,
                     FrameworkPropertyMetadataOptions.BindsTwoWayByDefault));
-				
+
 
         public static readonly DependencyProperty GameObjectProperty =
             DependencyProperty.Register("GameObject", typeof(UndertaleGameObject),

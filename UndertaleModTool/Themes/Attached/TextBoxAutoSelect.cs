@@ -39,7 +39,7 @@ namespace Theme.WPF.Themes.Attached
 
         public static bool GetIsEnabled(DependencyObject element)
         {
-            return (bool) element.GetValue(IsEnabledProperty);
+            return (bool)element.GetValue(IsEnabledProperty);
         }
     }
 }

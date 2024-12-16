@@ -31,7 +31,7 @@ namespace Theme.WPF.Themes.Attached
         {
             if (control is TextBoxBase || control is PasswordBox)
             {
-                return (bool) control.GetValue(ShowWhenFocusedProperty);
+                return (bool)control.GetValue(ShowWhenFocusedProperty);
             }
 
             throw new ArgumentException("Control was not a textbox", nameof(control));
