@@ -26,6 +26,8 @@ Changes from upstream/master (e1f5d22a):
 
 - new-github-actions: 1c5362fd~..3201f6e1
 
-- new-dark-mode: cc838650~..a31abe35 78426300
+- new-dark-mode: cc838650~..a31abe35 78426300 e0a83bd7 e0e8fc36
 
 - flags-editor: 253faf18 73474d97
+
+- set-transparency-colors: 7d3efbbe~..ed249661 4b528806
