@@ -53,6 +53,8 @@ namespace UndertaleModTool.Windows
             InitializeComponent();
         }
 
+
+
         public void ActivateAndFocusOnTextBox()
         {
             Activate();
@@ -306,6 +308,15 @@ namespace UndertaleModTool.Windows
         private void CopyCommand_Executed(object sender, ExecutedRoutedEventArgs e)
         {
             CopyListViewItems(ResultsListView.SelectedItems.Cast<Result>().OrderBy(item => ResultsListView.Items.IndexOf(item)));
+        }
+
+        private void Window_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
+        {
+            if (!IsVisible || IsLoaded)
+                return;
+
+            if (Settings.Instance.EnableDarkMode)
+                MainWindow.SetDarkTitleBarForWindow(this, true, false);
         }
 
         private void Window_Closing(object sender, CancelEventArgs e)

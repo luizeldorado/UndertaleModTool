@@ -6,8 +6,13 @@
         xmlns:local="clr-namespace:UndertaleModTool"
         xmlns:UndertaleModTool="clr-namespace:UndertaleModTool" x:Class="UndertaleModTool.Windows.SearchInCodeWindow"
         mc:Ignorable="d"
-        Title="Search in code" Height="500" Width="800" Closing="Window_Closing" WindowStartupLocation="CenterScreen"
-        FocusManager.FocusedElement="{Binding ElementName=SearchTextBox}" DataContext="{Binding Mode=OneWay, RelativeSource={RelativeSource Self}}">
+        Title="Search in code" Height="500" Width="800"
+        IsVisibleChanged="Window_IsVisibleChanged"
+        Closing="Window_Closing"
+        WindowStartupLocation="CenterScreen"
+        FocusManager.FocusedElement="{Binding ElementName=SearchTextBox}"
+        DataContext="{Binding Mode=OneWay, RelativeSource={RelativeSource Self}}"
+        Style="{DynamicResource DefaultWindowStyle}">
     <Window.Resources>
         <ContextMenu x:Key="ListViewItemContextMenu">
             <MenuItem Header="Open" Click="MenuItemOpen_Click"/>
@@ -33,12 +38,12 @@
                     <CommandBinding Command="Copy" Executed="CopyCommand_Executed"/>
                 </ListView.CommandBindings>
                 <ListView.Resources>
-                    <Style TargetType="TextBlock">
+                    <Style TargetType="{x:Type TextBlock}" BasedOn="{StaticResource {x:Type TextBlock}}">
                         <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
                     </Style>
                 </ListView.Resources>
                 <ListView.ItemContainerStyle>
-                    <Style TargetType="ListViewItem">
+                    <Style TargetType="{x:Type ListViewItem}" BasedOn="{StaticResource {x:Type ListViewItem}}">
                         <EventSetter Event="MouseDoubleClick" Handler="ListViewItem_MouseDoubleClick"/>
                         <EventSetter Event="KeyDown" Handler="ListViewItem_KeyDown"/>
                         <Setter Property="FontFamily" Value="Consolas"/>
