@@ -16,7 +16,7 @@ namespace UndertaleModTool
                 ScriptError(path + " does not exist!");
                 return false;
             }
-            RunScript(path);
+            RunScript(path).GetAwaiter().GetResult();
             if (!ScriptExecutionSuccess)
                 ScriptError("An error of type \"" + ScriptErrorType + "\" occurred. The error is:\n\n" + ScriptErrorMessage, ScriptErrorType);
             return ScriptExecutionSuccess;

@@ -1,4 +1,6 @@
-﻿using System;
+﻿#pragma warning disable CA1416 // Validate platform compatibility
+
+using System;
 using System.IO;
 using System.Windows;
 using NAudio.Vorbis;
@@ -172,3 +174,5 @@ namespace UndertaleModTool
         }
     }
 }
+
+#pragma warning restore CA1416 // Validate platform compatibility

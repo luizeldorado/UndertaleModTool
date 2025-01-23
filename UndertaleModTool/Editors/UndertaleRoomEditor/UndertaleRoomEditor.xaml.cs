@@ -1,3 +1,5 @@
+#pragma warning disable CA1416 // Validate platform compatibility
+
 using System;
 using System.Buffers;
 using System.Collections;
@@ -2781,3 +2783,5 @@ namespace UndertaleModTool
         }
     }
 }
+
+#pragma warning restore CA1416 // Validate platform compatibility
